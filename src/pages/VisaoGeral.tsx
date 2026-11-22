@@ -5,7 +5,8 @@ import { caixinha } from '../data/caixinhas';
 import { FASES } from '../data/aulas3bim';
 import type { DiscId } from '../data/tipos';
 import { aulaAtual, caixinhasNaSemana, useStore } from '../store/store';
-import { DiscTag } from '../components/ui';
+import { DiscTag, Modal } from '../components/ui';
+import { metodologia } from '../data/metodologias';
 import { AulaEditor } from '../components/AulaEditor';
 import { ListaSemanas } from './Conteudos';
 import type { PedidoDoc } from './Documento';
@@ -16,6 +17,7 @@ export function VisaoGeral({ onGerar }: { onGerar: (p: PedidoDoc) => void }) {
   const [bim, setBim] = useState(3);
   const [entrar, setEntrar] = useState<DiscId | null>(null);
   const [aula, setAula] = useState<{ d: DiscId; bim: number; sem: number; n: number } | null>(null);
+  const [semana, setSemana] = useState<{ d: DiscId; sem: number } | null>(null);
   const semanas = SEMANAS[bim];
   const dono = (d: DiscId) => {
     const p = PERFIS.find((x) => x.disc === d) ?? PERFIS.find((x) => s.frentes[d as 'red' | 'gl'] === x.id);
@@ -43,18 +45,20 @@ export function VisaoGeral({ onGerar }: { onGerar: (p: PedidoDoc) => void }) {
           </button>
         ))}
       </div>
-      {bim === 3 && (
-        <div className="fases" style={{ maxWidth: '100%' }}>
-          {FASES.map((f) => (
-            <span key={f.nome} className={'fase ' + f.cor} style={{ flex: f.semanas[1] - f.semanas[0] + 1 }}>
-              {f.nome}
-            </span>
-          ))}
-        </div>
-      )}
       <div className="card grade">
         <table>
           <thead>
+            {bim === 3 && (
+              <tr className="fases-linha">
+                <th />
+                {FASES.map((f) => (
+                  <th key={f.nome} colSpan={f.semanas[1] - f.semanas[0] + 1}>
+                    <span className={'fase ' + f.cor}>{f.nome}</span>
+                  </th>
+                ))}
+                {semanas.length > 10 && <th colSpan={semanas.length - 10} />}
+              </tr>
+            )}
             <tr>
               <th>Disciplina</th>
               {semanas.map((w) => (
@@ -84,19 +88,25 @@ export function VisaoGeral({ onGerar }: { onGerar: (p: PedidoDoc) => void }) {
                   </th>
                   {semanas.map((w) => {
                     const cxs = caixinhasNaSemana(doc, bim, w.n);
+                    const aulas = doc.modo ? Array.from({ length: doc.aulasSemana }, (_, i) => aulaAtual(x.id, doc, bim, w.n, i + 1)) : [];
                     return (
                       <td key={w.n}>
                         {!doc.modo && <span className="small muted">—</span>}
                         {cxs.map(({ id, inicio }) => (
                           <button
                             key={id}
-                            className="cx"
+                            className={'cx' + (inicio ? '' : ' continua')}
                             style={{ ['--c' as string]: `var(${disc(x.id).cor})`, marginBottom: '0.25rem' }}
-                            onClick={() => setAula({ d: x.id, bim, sem: w.n, n: 1 })}
-                            title={aulaAtual(x.id, doc, bim, w.n, 1).titulo}
+                            onClick={() => setSemana({ d: x.id, sem: w.n })}
+                            title="Ver as aulas desta semana"
                           >
+                            {!inicio && <span className="meta continua-rotulo">↳ continuação</span>}
                             <strong style={{ fontSize: '0.78rem' }}>{caixinha(id)!.titulo}</strong>
-                            {!inicio && <span className="meta">continuação</span>}
+                          </button>
+                        ))}
+                        {aulas.map((a, i) => (
+                          <button key={i} className={'mini-aula' + (a.titulo ? '' : ' vazia')} onClick={() => setAula({ d: x.id, bim, sem: w.n, n: i + 1 })} title={a.titulo || 'Aula não planejada'}>
+                            <span className="num">A{i + 1}</span> {a.titulo || 'não planejada'}
                           </button>
                         ))}
                       </td>
@@ -127,6 +137,7 @@ export function VisaoGeral({ onGerar }: { onGerar: (p: PedidoDoc) => void }) {
           )}
         </section>
       )}
+      {semana && !aula && <SemanaModal d={semana.d} bim={bim} sem={semana.sem} onFechar={() => setSemana(null)} onAbrir={(n) => setAula({ d: semana.d, bim, sem: semana.sem, n })} />}
       {aula && <AulaEditor {...aula} somenteLeitura={aula.d !== s.minhaDisc} onFechar={() => setAula(null)} />}
     </>
   );
@@ -191,5 +202,62 @@ function ProgressoProjeto({ onGerar, dono }: { onGerar: (p: PedidoDoc) => void; 
         )}
       </div>
     </section>
+  );
+}
+
+function SemanaModal({ d, bim, sem, onFechar, onAbrir }: { d: DiscId; bim: number; sem: number; onFechar: () => void; onAbrir: (n: number) => void }) {
+  const s = useStore();
+  const doc = s.discs[d];
+  const w = SEMANAS[bim][sem - 1];
+  const cxs = caixinhasNaSemana(doc, bim, sem);
+  return (
+    <Modal titulo={`Semana ${sem}`} onFechar={onFechar}>
+      <div className="row" style={{ alignItems: 'flex-start' }}>
+        <div>
+          <DiscTag d={d} />
+          <p className="small muted" style={{ margin: 0 }}>
+            {bim}º bimestre · Semana {sem} ({fmt(w.inicio)} a {fmt(w.fim)})
+          </p>
+        </div>
+        <span className="spacer" />
+        <button className="btn sm ghost" onClick={onFechar} aria-label="Fechar">
+          ✕
+        </button>
+      </div>
+      <h2 style={{ marginTop: '0.6rem' }}>{cxs.map((c) => caixinha(c.id)!.titulo).join(' + ') || 'Sem conteúdo nesta semana'}</h2>
+      <div className="stack">
+        {Array.from({ length: doc.aulasSemana }, (_, i) => i + 1).map((n) => {
+          const a = aulaAtual(d, doc, bim, sem, n);
+          const met = metodologia(a.metodologia);
+          return (
+            <div key={n} className={'momento' + (a.origem === 'ia' ? ' ia' : '')}>
+              <div className="row">
+                <strong>
+                  Aula {n}: {a.titulo || <span className="muted">não planejada</span>}
+                </strong>
+                <span className="spacer" />
+                <button className="btn sm" onClick={() => onAbrir(n)}>
+                  {d === s.minhaDisc ? 'Abrir e editar' : 'Ver aula completa'}
+                </button>
+              </div>
+              {met && (
+                <span className="small muted">
+                  {met.nome} · {a.duracao} min
+                </span>
+              )}
+              {a.momentos.length > 0 && (
+                <ol className="small" style={{ margin: 0, paddingLeft: '1.2rem' }}>
+                  {a.momentos.map((m, i) => (
+                    <li key={i}>
+                      <strong>{m.titulo}</strong> ({m.min} min{m.espaco ? `, ${m.espaco}` : ""}): {m.desc}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </Modal>
   );
 }

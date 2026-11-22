@@ -533,3 +533,10 @@ input[type='checkbox']:focus-visible, input[type='radio']:focus-visible { outlin
 .btn.perigo { color: var(--hot); }
 .btn.perigo:hover:not(:disabled) { border-color: var(--hot); background: color-mix(in srgb, var(--hot) 8%, var(--surface)); }
 .btn.perigo-forte { background: var(--hot); border-color: var(--hot); color: #fff; }
+.mini-aula { display: block; width: 100%; text-align: left; border: 1px dashed var(--line); background: var(--paper); border-radius: 4px; padding: 0.2rem 0.35rem; margin-top: 0.2rem; font-size: 0.72rem; line-height: 1.25; cursor: pointer; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.mini-aula:hover { border-color: var(--focus); border-style: solid; }
+.mini-aula.vazia { color: var(--ink-2); font-style: italic; }
+.mini-aula .num { font-style: normal; font-weight: 600; color: var(--ink-2); }
+.fases-linha th { padding: 0; }
+.fases-linha .fase { display: block; border-radius: 4px; }
+.grade td { min-width: 8.5rem; }
