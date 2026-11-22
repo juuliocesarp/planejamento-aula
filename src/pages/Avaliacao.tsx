@@ -4,6 +4,8 @@ import { DISCIPLINAS, disc } from '../data/base';
 import { BIMESTRES } from '../data/calendario';
 import { caixinha } from '../data/caixinhas';
 import { FORMAS_AVALIACAO, formaAvaliacao } from '../data/metodologias';
+import { Escolha } from '../components/Escolha';
+import { AJUDA_AVALIACAO } from '../data/ajudas';
 import { SUG_AVALIACAO, SUG_RUBRICA } from '../data/sugestoes';
 import { useStore } from '../store/store';
 import type { ItemAvaliacao } from '../store/tipos';
@@ -133,16 +135,17 @@ function ItemCard({ it, onMudar, onRemover, opcoes }: { it: ItemAvaliacao; onMud
         </button>
       </div>
       <div className="grid2" style={{ gap: '0.5rem' }}>
-        <label className="field">
+        <div className="field">
           <span className="small">Forma de avaliação</span>
-          <select className="select" value={it.forma} onChange={(e) => onMudar({ forma: e.target.value, semConteudo: !!formaAvaliacao(e.target.value)?.semConteudo || it.semConteudo })}>
-            {FORMAS_AVALIACAO.map((x) => (
-              <option key={x.id} value={x.id}>
-                {x.nome}
-              </option>
-            ))}
-          </select>
-        </label>
+          <Escolha
+            rotulo="Forma de avaliação"
+            tipoAjuda="Forma de avaliação"
+            valor={it.forma}
+            opcoes={FORMAS_AVALIACAO.map((x) => ({ id: x.id, nome: x.nome }))}
+            ajudas={AJUDA_AVALIACAO}
+            onEscolher={(id) => onMudar({ forma: id, semConteudo: !!formaAvaliacao(id)?.semConteudo || it.semConteudo })}
+          />
+        </div>
         <div className="row" style={{ alignItems: 'flex-end', flexWrap: 'nowrap' }}>
           <label className="field" style={{ flex: 1 }}>
             <span className="small">Nome</span>

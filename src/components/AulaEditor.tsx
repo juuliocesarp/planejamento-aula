@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { DiscId, Momento } from '../data/tipos';
 import { caixinha } from '../data/caixinhas';
+import { Escolha } from './Escolha';
+import { AJUDA_METODOLOGIA } from '../data/ajudas';
 import { ESPACOS, METODOLOGIAS, RECURSOS, metodologia } from '../data/metodologias';
 import { SEMANAS, fmt } from '../data/calendario';
 import { disc } from '../data/base';
@@ -100,17 +102,20 @@ export function AulaEditor({ d, bim, sem, n, somenteLeitura, onFechar }: { d: Di
         </div>
 
         <div className="grid2">
-          <label className="field">
+          <div className="field">
             <span>Metodologia</span>
-            <select className="select" disabled={ro} value={a.metodologia} onChange={(e) => (a.momentos.length ? setTrocar(e.target.value) : aplicarMetodologia(e.target.value))}>
-              <option value="">Escolha uma metodologia</option>
-              {METODOLOGIAS.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.nome}
-                </option>
-              ))}
-            </select>
-          </label>
+            <Escolha
+              rotulo="Metodologia"
+              tipoAjuda="Metodologia"
+              placeholder="Escolha uma metodologia"
+              disabled={ro}
+              valor={a.metodologia}
+              opcoes={METODOLOGIAS.map((m) => ({ id: m.id, nome: m.nome, detalhe: m.matriz }))}
+              ajudas={AJUDA_METODOLOGIA}
+              disc={d}
+              onEscolher={(id) => (id === a.metodologia ? undefined : a.momentos.length ? setTrocar(id) : aplicarMetodologia(id))}
+            />
+          </div>
           <div className="field">
             <span>Duração</span>
             <div className="seg">

@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { FONTES, disc, expandirFontes, type Perfil } from '../data/base';
 import type { DiscId } from '../data/tipos';
@@ -127,24 +128,43 @@ export function VerSugestao({ texto, fontes, onUsar, rotulo = 'Ver sugestão da 
   );
 }
 
-export function Modal({ titulo, onFechar, children }: { titulo: string; onFechar: () => void; children: ReactNode }) {
+const pilhaModais: number[] = [];
+let proxModal = 1;
+
+export function Modal({ titulo, onFechar, children, classe }: { titulo: string; onFechar: () => void; children: ReactNode; classe?: string }) {
+  const fecharRef = useRef(onFechar);
+  fecharRef.current = onFechar;
   useEffect(() => {
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && onFechar();
+    const id = proxModal++;
+    pilhaModais.push(id);
+    // Só o modal do topo responde ao Esc (modal de ajuda aberto por cima de outro).
+    const esc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && pilhaModais[pilhaModais.length - 1] === id) {
+        e.stopPropagation();
+        fecharRef.current();
+      }
+    };
     document.addEventListener('keydown', esc);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.removeEventListener('keydown', esc);
+      pilhaModais.splice(pilhaModais.indexOf(id), 1);
       document.body.style.overflow = prev;
     };
-  }, [onFechar]);
-  return (
+  }, []);
+  return createPortal(
     <div className="modal-fundo" onMouseDown={(e) => e.target === e.currentTarget && onFechar()}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label={titulo}>
+      <div className={'modal' + (classe ? ' ' + classe : '')} role="dialog" aria-modal="true" aria-label={titulo}>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
+}
+
+export function modalAberto() {
+  return pilhaModais.length;
 }
 
 export function Barra({ valor, max, rotulo }: { valor: number; max: number; rotulo: string }) {
