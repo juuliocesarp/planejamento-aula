@@ -530,3 +530,6 @@ input[type='checkbox']:focus-visible, input[type='radio']:focus-visible { outlin
 @media (max-width: 700px) { .progresso-cab { grid-template-columns: 1fr 3rem; } .progresso-cab > .small.muted { display: none; } .progresso-barra { grid-column: 1 / -1; } }
 .menu-pop label.row { flex-wrap: nowrap; }
 .menu-pop { width: 19rem; }
+.btn.perigo { color: var(--hot); }
+.btn.perigo:hover:not(:disabled) { border-color: var(--hot); background: color-mix(in srgb, var(--hot) 8%, var(--surface)); }
+.btn.perigo-forte { background: var(--hot); border-color: var(--hot); color: #fff; }

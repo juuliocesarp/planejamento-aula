@@ -14,6 +14,7 @@ export function AulaEditor({ d, bim, sem, n, somenteLeitura, onFechar }: { d: Di
   const a = aulaAtual(d, doc, bim, sem, n);
   const pronta = aulaPronta(d, doc, bim, sem, n);
   const [trocar, setTrocar] = useState<string | null>(null);
+  const [limpar, setLimpar] = useState(false);
   const w = SEMANAS[bim][sem - 1];
   const daSemana = caixinhasNaSemana(doc, bim, sem).map((c) => c.id);
   const opcoesCx = [...new Set([...daSemana, ...a.caixinhas])];
@@ -229,6 +230,18 @@ export function AulaEditor({ d, bim, sem, n, somenteLeitura, onFechar }: { d: Di
               }
             >
               ✦ Voltar à sugestão original
+            </button>
+          )}
+          {!ro && (
+            <button
+              className="btn sm ghost perigo"
+              onClick={() => {
+                if (!limpar) return setLimpar(true);
+                s.atualizarDisc(d, (x) => ({ ...x, aulas: { ...x.aulas, [aulaChave(bim, sem, n)]: { titulo: '', metodologia: '', momentos: [], duracao: 50, caixinhas: [], fontes: [], origem: 'manual' } } }));
+                setLimpar(false);
+              }}
+            >
+              {limpar ? 'Confirmar: limpar esta aula' : 'Limpar aula'}
             </button>
           )}
           <button className="btn primary" onClick={onFechar}>

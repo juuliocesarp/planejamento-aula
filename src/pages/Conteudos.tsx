@@ -47,6 +47,7 @@ export function Conteudos() {
   const [mover, setMover] = useState<string | null>(null);
   const [detalhe, setDetalhe] = useState<{ id: string; d: DiscId } | null>(null);
   const [confirmarTudo, setConfirmarTudo] = useState(false);
+  const [confirmarLimpar, setConfirmarLimpar] = useState(false);
   const [toast, setToast] = useState('');
   const ultimoArraste = useRef(0);
 
@@ -117,6 +118,23 @@ export function Conteudos() {
       base,
     );
     avisar(n ? `A IA sugeriu ${n} aulas no ${bim}º bimestre. Tudo continua editável.` : 'Não havia aulas vazias para preencher neste bimestre.');
+  };
+
+  const limparBimestre = () => {
+    setConfirmarLimpar(false);
+    s.atualizarDisc(d, (x) => {
+      const placements = Object.fromEntries(Object.entries(x.placements).filter(([, p]) => p.bim !== bim));
+      const aulas = Object.fromEntries(Object.entries(x.aulas).filter(([k]) => !k.startsWith(bim + '-')));
+      // Grava aulas vazias para que as sugestões prontas não reapareçam.
+      for (const w of SEMANAS[bim]) for (let i = 1; i <= x.aulasSemana; i++) aulas[aulaChave(bim, w.n, i)] = { titulo: '', metodologia: '', momentos: [], duracao: 50, caixinhas: [], fontes: [], origem: 'manual' };
+      return { ...x, placements, aulas };
+    });
+    avisar(`O ${bim}º bimestre foi limpo: conteúdos de volta na estante e aulas zeradas.`);
+  };
+  const limparTudo = () => {
+    setConfirmarLimpar(false);
+    s.atualizarDisc(d, (x) => ({ ...x, modo: 'vazio', placements: {}, aulas: {} }));
+    avisar('Tudo foi limpo: todos os conteúdos estão na estante e as aulas estão zeradas.');
   };
 
   const fimArraste = (e: DragEndEvent) => {
@@ -204,7 +222,10 @@ export function Conteudos() {
           </select>
         </label>
         <span className="spacer" />
-        <button className="btn ia forte" onClick={() => setConfirmarTudo(true)}>
+        <button className="btn sm perigo" onClick={() => (setConfirmarLimpar(true), setConfirmarTudo(false))}>
+          Limpar…
+        </button>
+        <button className="btn ia forte" onClick={() => (setConfirmarTudo(true), setConfirmarLimpar(false))}>
           ✦ IA: sugerir tudo do {bim}º bimestre
         </button>
       </div>
@@ -221,6 +242,21 @@ export function Conteudos() {
             Substituir todas
           </button>
           <button className="btn sm ghost" onClick={() => setConfirmarTudo(false)}>
+            Cancelar
+          </button>
+        </div>
+      )}
+
+      {confirmarLimpar && (
+        <div className="alerta row" role="alert" style={{ marginBottom: '0.8rem' }}>
+          <span>Limpar devolve os conteúdos para a estante e zera as aulas. Isso não pode ser desfeito.</span>
+          <button className="btn sm" onClick={() => limparBimestre()}>
+            Limpar só o {bim}º bimestre
+          </button>
+          <button className="btn sm perigo-forte" onClick={() => limparTudo()}>
+            Limpar tudo (todos os bimestres)
+          </button>
+          <button className="btn sm ghost" onClick={() => setConfirmarLimpar(false)}>
             Cancelar
           </button>
         </div>
