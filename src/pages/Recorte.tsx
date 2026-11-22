@@ -22,10 +22,10 @@ const MODOS: { id: Modo; nome: string; resumo: string; acontece: string[]; voce:
   {
     id: 'referencia',
     nome: 'Plano de referência',
-    resumo: 'Os conteúdos já ficam distribuídos no ano, na ordem sugerida pelo guia de referência do grupo.',
+    resumo: 'Os conteúdos já ficam distribuídos no ano, na ordem dos currículos de referência (organizadores curriculares de Pernambuco, Sergipe e IFPB, alinhados à BNCC).',
     acontece: [
-      'Cada conteúdo (caixinha) fica na semana em que o guia sugere, usando as datas do calendário da SEEDF 2026.',
-      'O projeto da revista não é montado: o 3º bimestre segue a ordem do guia (por exemplo, Óptica em Física).',
+      'Cada conteúdo (caixinha) fica na semana sugerida por esses currículos, usando as datas do calendário da SEEDF 2026.',
+      'O projeto da revista não é montado: o 3º bimestre segue a ordem desses currículos (por exemplo, Óptica em Física).',
       'As aulas começam vazias.',
     ],
     voce: 'Escolher a metodologia e preencher cada aula do zero.',

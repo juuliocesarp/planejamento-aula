@@ -32,7 +32,7 @@ export function Objetivos() {
           <textarea className="textarea" value={doc.objetivoGeral.valor} onChange={(e) => set((x) => ({ ...x, objetivoGeral: { valor: e.target.value, origem: x.objetivoGeral.origem === 'ia' ? 'editado' : x.objetivoGeral.origem } }))} />
         </label>
         <div style={{ margin: '0.5rem 0 1rem' }}>
-          <VerSugestao texto={sug.objetivoGeral} fontes={sug.fontes} onUsar={(t) => set((x) => ({ ...x, objetivoGeral: { valor: t, origem: 'ia' } }))} />
+          <VerSugestao disc={d} texto={sug.objetivoGeral} fontes={sug.fontes} onUsar={(t) => set((x) => ({ ...x, objetivoGeral: { valor: t, origem: 'ia' } }))} />
         </div>
 
         <div className="field">
@@ -59,7 +59,7 @@ export function Objetivos() {
           </div>
         </div>
         <div style={{ marginTop: '0.6rem' }}>
-          <VerSugestao texto={sug.objetivosEspecificos} fontes={sug.fontes} onUsar={(t) => set((x) => ({ ...x, objetivosEspecificos: t.split('\n') }))} />
+          <VerSugestao disc={d} texto={sug.objetivosEspecificos} fontes={sug.fontes} onUsar={(t) => set((x) => ({ ...x, objetivosEspecificos: t.split('\n') }))} />
         </div>
       </section>
     </>

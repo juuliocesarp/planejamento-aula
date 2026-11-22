@@ -407,3 +407,4 @@ label.row:has(input[type='checkbox']):hover { background: var(--surface-2); }
 .select:hover, .input:hover, .textarea:hover { border-color: var(--ink-2); }
 .cx:not(.outro):hover { border-color: var(--ink-2); box-shadow: var(--shadow); }
 .grade .cx:hover { box-shadow: var(--shadow); }
+.fonte-tip::before { content: ''; position: absolute; left: 0; right: 0; bottom: -10px; height: 10px; }

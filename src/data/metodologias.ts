@@ -5,7 +5,7 @@ const m = (titulo: string, min: number, desc: string, espaco = 'Sala de aula', r
 // Resumos e etapas a partir da seção 3 do guia de referência ("Repertório Sistemático de Metodologias de Ensino").
 export const METODOLOGIAS: Metodologia[] = [
   {
-    id: 'expositiva', nome: 'Aula expositiva dialogada', matriz: 'Expositiva / mediadora', fonte: 'guia',
+    id: 'expositiva', nome: 'Aula expositiva dialogada', matriz: 'Expositiva / mediadora', fonte: 'metativas',
     resumo: 'Sistematização do professor permeada por perguntas problematizadoras e pelos conhecimentos prévios dos alunos (Ausubel).',
     momentos: [
       m('Pergunta de abertura', 8, 'Lançar uma pergunta ligada ao cotidiano e anotar no quadro as hipóteses da turma.', 'Sala de aula', ['Quadro']),
@@ -47,7 +47,7 @@ export const METODOLOGIAS: Metodologia[] = [
     ],
   },
   {
-    id: 'tbl', nome: 'TBL (Aprendizagem Baseada em Equipes)', matriz: 'Ativa / colaborativa', fonte: 'guia',
+    id: 'tbl', nome: 'TBL (Aprendizagem Baseada em Equipes)', matriz: 'Ativa / colaborativa', fonte: 'metativas',
     resumo: 'Estudo prévio, teste individual, teste em equipe com feedback imediato e aplicação em entrega coletiva.',
     momentos: [
       m('Teste individual', 10, 'Teste curto sobre o material estudado antes da aula.', 'Sala de aula', ['Folha de teste']),
@@ -57,7 +57,7 @@ export const METODOLOGIAS: Metodologia[] = [
     ],
   },
   {
-    id: 'abp', nome: 'ABP (Aprendizagem Baseada em Projetos)', matriz: 'Ativa / integradora', fonte: 'guia',
+    id: 'abp', nome: 'ABP (Aprendizagem Baseada em Projetos)', matriz: 'Ativa / integradora', fonte: 'moran',
     resumo: 'Investigação prolongada para criar um produto ou intervenção real, articulando disciplinas.',
     momentos: [
       m('Retomada da pergunta motriz', 5, 'Relembrar o desafio do projeto e o que falta entregar.', 'Sala de aula'),
@@ -66,7 +66,7 @@ export const METODOLOGIAS: Metodologia[] = [
     ],
   },
   {
-    id: 'pbl', nome: 'PBL (Aprendizagem Baseada em Problemas)', matriz: 'Ativa / investigativa', fonte: 'guia',
+    id: 'pbl', nome: 'PBL (Aprendizagem Baseada em Problemas)', matriz: 'Ativa / investigativa', fonte: 'moran',
     resumo: 'Problema aberto e complexo discutido em grupos tutoriais que levantam hipóteses, pesquisam e propõem soluções.',
     momentos: [
       m('Apresentação do problema', 8, 'Ler o problema e destacar termos desconhecidos.', 'Sala de aula', ['Texto do problema']),
@@ -76,7 +76,7 @@ export const METODOLOGIAS: Metodologia[] = [
     ],
   },
   {
-    id: 'invertida', nome: 'Sala de aula invertida', matriz: 'Ativa / híbrida', fonte: 'guia',
+    id: 'invertida', nome: 'Sala de aula invertida', matriz: 'Ativa / híbrida', fonte: 'moran',
     resumo: 'Contato inicial com a teoria fora da aula (texto, vídeo, simulação); em sala, debate, prática e produção.',
     momentos: [
       m('Verificação do estudo prévio', 8, 'Perguntas rápidas sobre o material indicado.', 'Sala de aula'),
@@ -85,7 +85,7 @@ export const METODOLOGIAS: Metodologia[] = [
     ],
   },
   {
-    id: 'estacoes', nome: 'Rotação por estações', matriz: 'Ativa / híbrida', fonte: 'guia',
+    id: 'estacoes', nome: 'Rotação por estações', matriz: 'Ativa / híbrida', fonte: 'moran',
     resumo: 'Grupos alternam entre estações com propostas diferentes (experimental, digital, leitura, mentoria).',
     momentos: [
       m('Orientação', 5, 'Explicar as estações e o tempo de cada uma.', 'Sala de aula'),
@@ -96,7 +96,7 @@ export const METODOLOGIAS: Metodologia[] = [
     ],
   },
   {
-    id: 'caso', nome: 'Estudo de caso', matriz: 'Ativa / contextual', fonte: 'guia',
+    id: 'caso', nome: 'Estudo de caso', matriz: 'Ativa / contextual', fonte: 'moran',
     resumo: 'Análise de um dilema real para tomada de decisão fundamentada.',
     momentos: [
       m('Apresentação do caso', 10, 'Leitura do caso com os dados principais.', 'Sala de aula', ['Texto do caso']),
@@ -105,7 +105,7 @@ export const METODOLOGIAS: Metodologia[] = [
     ],
   },
   {
-    id: 'debate', nome: 'Debate regrado', matriz: 'Ativa / argumentativa', fonte: 'projeto',
+    id: 'debate', nome: 'Debate regrado', matriz: 'Ativa / argumentativa', fonte: 'bncc',
     resumo: 'Confronto organizado de posições com tempo de fala, réplica e síntese.',
     momentos: [
       m('Preparação', 12, 'Grupos organizam argumentos e evidências para sua posição.', 'Sala de aula', ['Fontes impressas']),
@@ -114,7 +114,7 @@ export const METODOLOGIAS: Metodologia[] = [
     ],
   },
   {
-    id: 'experimento', nome: 'Ensino por investigação (experimento)', matriz: 'Ativa / investigativa', fonte: 'guia',
+    id: 'experimento', nome: 'Ensino por investigação (experimento)', matriz: 'Ativa / investigativa', fonte: 'ldb',
     resumo: 'Investigação prática: pergunta, hipótese, experimento, dados e conclusão (Art. 35-B da LDB pede metodologias investigativas).',
     momentos: [
       m('Pergunta e hipótese', 8, 'Apresentar a pergunta investigável; grupos registram hipóteses.', 'Laboratório', ['Caderno de bordo']),
@@ -124,7 +124,7 @@ export const METODOLOGIAS: Metodologia[] = [
     ],
   },
   {
-    id: 'oficina', nome: 'Oficina de produção textual', matriz: 'Ativa / produção', fonte: 'projeto',
+    id: 'oficina', nome: 'Oficina de produção textual', matriz: 'Ativa / produção', fonte: 'marcuschi',
     resumo: 'Escrita orientada em etapas: planejamento, rascunho, revisão e reescrita.',
     momentos: [
       m('Planejamento', 10, 'Retomar o gênero e montar o roteiro do texto.', 'Sala de aula', ['Ficha do gênero']),
@@ -133,7 +133,7 @@ export const METODOLOGIAS: Metodologia[] = [
     ],
   },
   {
-    id: 'gamificacao', nome: 'Gamificação', matriz: 'Ativa / lúdica', fonte: 'guia',
+    id: 'gamificacao', nome: 'Gamificação', matriz: 'Ativa / lúdica', fonte: 'gamificacao',
     resumo: 'Missões com objetivos claros, regras, narrativa e feedback imediato.',
     momentos: [
       m('Narrativa e regras', 7, 'Apresentar a missão e a pontuação.', 'Sala de aula'),
@@ -142,7 +142,7 @@ export const METODOLOGIAS: Metodologia[] = [
     ],
   },
   {
-    id: 'seminario', nome: 'Seminário / apresentação', matriz: 'Ativa / comunicação', fonte: 'guia',
+    id: 'seminario', nome: 'Seminário / apresentação', matriz: 'Ativa / comunicação', fonte: 'metativas',
     resumo: 'Exposição estruturada de pesquisa pelos alunos, com arguição.',
     momentos: [
       m('Organização', 5, 'Ordem das apresentações e critérios.', 'Sala de aula'),

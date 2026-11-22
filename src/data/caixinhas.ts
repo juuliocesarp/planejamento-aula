@@ -186,7 +186,7 @@ const projeto: Caixinha[] = [
   ...ETAPAS('red', 'Escrita, revisão por pares e reescrita'),
   ...ETAPAS('gl', 'Revisão linguística e crônica literária'),
   p('red', 'generos', 'Gêneros jornalísticos e de divulgação científica', 'Reportagem de divulgação científica / Editorial / Artigo de opinião / Entrevista / Infográfico', 'Análise de revistas reais (Pesquisa FAPESP, Ciência Hoje) e estrutura dos gêneros.', { semanasGuia: 2 }),
-  p('his', 'brasil', 'Industrialização e urbanização no Brasil e no DF', 'Ferrovias e café / Era Vargas e Plano de Metas / Rodoviarismo / Construção de Brasília e candangos', 'Aprofundamento do projeto. Atenção: no guia, este conteúdo não está no 2º ano (costuma ser 3º ano).'),
+  p('his', 'brasil', 'Industrialização e urbanização no Brasil e no DF', 'Ferrovias e café / Era Vargas e Plano de Metas / Rodoviarismo / Construção de Brasília e candangos', 'Aprofundamento do projeto. Atenção: nos currículos de referência, este conteúdo não está no 2º ano (costuma ser do 3º ano).'),
 ];
 
 export const CAIXINHAS: Caixinha[] = [...fisica, ...geografia, ...historia, ...gramatica, ...literatura, ...redacao, ...projeto];

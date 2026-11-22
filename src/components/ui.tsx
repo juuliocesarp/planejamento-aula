@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { FONTES, disc, type Perfil } from '../data/base';
+import { FONTES, disc, expandirFontes, type Perfil } from '../data/base';
 import type { DiscId } from '../data/tipos';
 import type { Origem } from '../store/tipos';
 
@@ -21,12 +21,13 @@ export function DiscTag({ d, curto }: { d: DiscId; curto?: boolean }) {
   );
 }
 
-export function Fontes({ ids }: { ids: string[] }) {
-  if (!ids.length) return null;
+export function Fontes({ ids, disc: d }: { ids: string[]; disc?: DiscId }) {
+  const lista = expandirFontes(ids, d);
+  if (!lista.length) return null;
   return (
     <span className="row small" style={{ gap: '0.5rem' }}>
-      <span className="muted">Fonte:</span>
-      {ids.map((id) => (
+      <span className="muted">{lista.length > 1 ? 'Fontes:' : 'Fonte:'}</span>
+      {lista.map((id) => (
         <Fonte key={id} id={id} />
       ))}
     </span>
@@ -52,14 +53,14 @@ export function Fonte({ id }: { id: string }) {
       {aberto && (
         <span className="fonte-tip" role="tooltip">
           {f.detalhe}
-          {f.url && (
+          {f.url ? (
             <>
               {' '}
               <a href={f.url} target="_blank" rel="noreferrer">
-                Abrir fonte
+                Abrir a fonte original ↗
               </a>
             </>
-          )}
+          ) : null}
         </span>
       )}
     </span>
@@ -90,7 +91,7 @@ export function AvisoIA() {
 }
 
 /** Caixa que mostra uma sugestão da IA só quando a pessoa pede. */
-export function VerSugestao({ texto, fontes, onUsar, rotulo = 'Ver sugestão da IA' }: { texto: string; fontes: string[]; onUsar: (t: string) => void; rotulo?: string }) {
+export function VerSugestao({ texto, fontes, onUsar, rotulo = 'Ver sugestão da IA', disc: d }: { texto: string; fontes: string[]; onUsar: (t: string) => void; rotulo?: string; disc?: DiscId }) {
   const [aberto, setAberto] = useState(false);
   if (!aberto)
     return (
@@ -109,7 +110,7 @@ export function VerSugestao({ texto, fontes, onUsar, rotulo = 'Ver sugestão da 
       </div>
       <div style={{ whiteSpace: 'pre-wrap' }}>{texto}</div>
       <div className="row">
-        <Fontes ids={fontes} />
+        <Fontes ids={fontes} disc={d} />
         <span className="spacer" />
         <button
           type="button"

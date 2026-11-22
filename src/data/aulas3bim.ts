@@ -98,7 +98,7 @@ const FIS: Semana[] = [
       'Planejamento|10|Escolher o fenômeno do dossiê (rendimento de usina, albedo, cálculo de kWh) e o tipo de esquema.||Ficha do gênero',
       'Produção|28|Desenhar à mão o esquema com setas de energia, números e legendas curtas.||Folhas; Lápis de cor',
       'Revisão|12|Troca entre núcleos: o esquema se entende sem o texto?||Ficha de revisão',
-    ], 'Cada dossiê da revista tem um box "A Física por Trás", previsto no PDF do projeto.'),
+    ], 'Cada núcleo da revista tem um box "A Física por Trás", parte da proposta do grupo.'),
   ],
   [
     A('Revisão científica dos rascunhos (2)', 'fis-proj-revisao', 'abp', [
@@ -110,7 +110,7 @@ const FIS: Semana[] = [
       'Orientações|5|Explicar as duas fases: hoje individual com tempo limitado; na próxima aula, revisão com consulta aos textos da revista.',
       'Fase 1|40|Questões a partir de trechos dos rascunhos das 4 turmas: interpretar, calcular e corrigir afirmações.||Prova impressa',
       'Recolhimento|5|Recolher as provas sem correção.',
-    ], 'O teste em duas fases está no catálogo de avaliações do guia de referência.', ['guia']),
+    ], 'O teste em duas fases une a avaliação somativa e a formativa: primeiro com tempo limitado, depois com revisão.', ['duasfases']),
   ],
   [
     A('Prova contextualizada: fase 2', 'fis-proj-revisao', 'expositiva', [
@@ -146,7 +146,7 @@ const FIS: Semana[] = [
       'Retorno|12|Mostrar a foto do mapa de hipóteses da semana 1.|Sala em círculo|Projetor',
       'Autoavaliação|25|Cada aluno responde: cite um conceito de Física que você não entendia e agora explica; como você contribuiu com seu núcleo?|Sala em círculo|Ficha de autoavaliação',
       'Roda final|13|O que mudou no seu olhar sobre a conta de luz?|Sala em círculo',
-    ], 'Exigir evidência concreta na autoavaliação evita respostas vagas, como sugere o PDF do projeto.', ['projeto', 'freire']),
+    ], 'Pedir evidência concreta na autoavaliação ("cite um conceito que agora você explica") evita respostas vagas.', ['avaliacao', 'freire']),
   ],
 ];
 
@@ -205,7 +205,7 @@ const GEO: Semana[] = [
       'Estação 2 — mapa|13|Localizar usinas e bacias hidrográficas que nascem no Cerrado.||Mapas',
       'Estação 3 — mentoria|13|Com o professor: montar a cadeia seca → reservatório → termelétrica → tarifa.',
       'Fechamento|6|Cadeia causal no quadro.||Quadro',
-    ], 'Cerrado como "berço das águas" aparece no PDF do projeto; a Física explica por que a termelétrica é mais cara.', ['aneel', 'projeto']),
+    ], 'O Cerrado abriga nascentes de grandes bacias hidrográficas; a Física explica por que a termelétrica é mais cara.', ['aneel', 'ben2025']),
   ],
   [
     A('Trabalho na era industrial e hoje', 'geo-27', 'freire', [
@@ -347,7 +347,7 @@ const HIS: Semana[] = [
       'Pergunta|8|Por que a capital saiu do Rio?||Quadro',
       'Exposição|25|Ferrovias do café; Era Vargas (CSN, Petrobras); Plano de Metas e indústria automobilística.||Projetor',
       'Aplicação|12|Linha do tempo da modernização brasileira.||Caderno',
-      'Síntese|5|Atenção: no guia, este conteúdo é do 3º ano; aqui é aprofundamento do projeto.||Quadro',
+      'Síntese|5|Atenção: nos currículos de referência, este conteúdo costuma ser do 3º ano; aqui é aprofundamento do projeto.||Quadro',
     ], undefined, ['projeto', 'guia']),
     A('A construção de Brasília e os candangos', 'his-proj-brasil', 'caso', [
       'Caso|10|Fontes sobre os acampamentos operários e a formação das cidades-satélites.||Texto do caso',
@@ -429,7 +429,7 @@ const RED: Semana[] = [
       'Apresentação|5|Cada turma é uma editora; 6 núcleos de 5 alunos; 6 dossiês.',
       'Formação|35|Núcleos escolhem nome da editora, dossiê e papéis: Editor-Chefe, Curador Histórico, Analista Espacial, Consultor Científico e Designer.||Ficha de papéis',
       'Registro|10|Ata do núcleo no portfólio.||Portfólio do núcleo',
-    ], 'Grupos de 5 com papéis definidos reduzem o "efeito carona", segundo o PDF do projeto.'),
+    ], 'Grupos de 5 com papéis definidos (editor-chefe, curador histórico, analista espacial, consultor científico e designer) ajudam a dividir o trabalho e evitar o "efeito carona".', ['grupo']),
   ],
   [
     A('Como é uma revista de divulgação científica', 'red-proj-generos', 'estacoes', [
@@ -438,7 +438,7 @@ const RED: Semana[] = [
       'Estação 2|13|Analisar um editorial e um artigo de opinião.||Revistas impressas',
       'Estação 3|13|Analisar um infográfico.||Revistas impressas',
       'Fechamento|6|Quadro comparativo dos gêneros.||Quadro',
-    ], 'O PDF do projeto sugere exemplares de Pesquisa FAPESP, Ciência Hoje e Superinteressante.'),
+    ], 'Use exemplares reais de revistas de divulgação científica, como Pesquisa FAPESP e Ciência Hoje, que têm sites abertos.', ['revistas', 'marcuschi']),
     A('Reportagem e retextualização', 'red-proj-generos', 'expositiva', [
       'Pergunta|8|Como explicar a 2ª Lei da Termodinâmica para sua avó?||Quadro',
       'Exposição|25|Estrutura da reportagem (lide, intertítulos, citações); retextualização sem perder a precisão.||Projetor',
@@ -470,7 +470,7 @@ const RED: Semana[] = [
       'Hipóteses|15|Grupos marcam trechos suspeitos.||Cartolina',
       'Pesquisa|20|Conferir com livro didático e fontes oficiais.|Biblioteca|Livro didático; Computadores',
       'Socialização|7|Quantos erros cada grupo achou?',
-    ], 'Atividade proposta no PDF do projeto, na seção sobre uso crítico de IA.'),
+    ], 'Mostrar na prática que a IA pode inventar dados e errar conceitos é a forma mais rápida de ensinar a checar fontes.', ['grupo', 'bncc']),
   ],
   [
     A('Repertório interdisciplinar', 'red-21', 'oficina', [
@@ -489,7 +489,7 @@ const RED: Semana[] = [
       'Planejamento|10|Retomar a pauta.',
       'Escrita|28|1ª versão à mão, sem IA.||Folhas pautadas',
       'Revisão|12|Autorrevisão.||Ficha de revisão',
-    ], 'O PDF do projeto pede a 1ª versão manuscrita em sala, sem IA, para garantir autoria.'),
+    ], 'Escrever a 1ª versão à mão, em sala e sem IA, garante que o texto é dos alunos.', ['grupo']),
     A('Escrita do editorial (Conselho Editorial)', 'red-proj-revisao', 'oficina', [
       'Planejamento|10|Editores-Chefes se reúnem; tese da edição.',
       'Escrita|28|Editorial coletivo da turma.||Folhas pautadas',
@@ -513,7 +513,7 @@ const RED: Semana[] = [
       'Orientação|10|Pedir à IA só apontamentos ("não reescreva meu texto").|Laboratório de informática',
       'Prática|28|Registrar no diário de prompts: objetivo, prompt, resposta e o que aceitaram.|Laboratório de informática|Computadores',
       'Revisão|12|Decidir o que incorporar.|Laboratório de informática',
-    ], 'Protocolo "antiterceirização" do PDF do projeto.'),
+    ], 'Regra do grupo: a IA só aponta problemas, quem reescreve é o aluno; tudo fica registrado no diário de prompts.', ['grupo']),
     A('Versão final dos textos', 'red-proj-revisao', 'oficina', [
       'Planejamento|10|Últimos ajustes.',
       'Escrita|30|Versão final.||Folhas pautadas',
@@ -613,7 +613,7 @@ const GL: Semana[] = [
       'Planejamento|10|Ensaio ou crônica ilustrada ligando o século XIX ao DF de hoje.',
       'Escrita|28|Roteiro do texto.||Folhas pautadas',
       'Revisão|12|Troca.||Ficha de revisão',
-    ], 'A seção Cultura, Literatura e Memória está prevista na estrutura da revista no PDF do projeto.'),
+    ], 'A seção Cultura, Literatura e Memória faz parte da estrutura da revista proposta pelo grupo.', ['grupo']),
   ],
   [
     A('Revisão linguística (1)', 'gl-proj-revisao', 'abp', [
@@ -637,7 +637,7 @@ const GL: Semana[] = [
       'Orientação|10|Transcrição ética: respeitar a fala do entrevistado.',
       'Prática|28|Editar a transcrição das entrevistas sem apagar a variedade linguística.||Transcrições',
       'Revisão|12|Troca.||Ficha de revisão',
-    ], 'Variação e preconceito linguístico estão no eixo de Sociolinguística do guia.', ['guia', 'projeto']),
+    ], 'Variação e preconceito linguístico fazem parte do eixo de Sociolinguística do 2º ano.', ['pe-lp', 'bncc']),
   ],
   [
     A('Revisão por pares linguística', 'gl-proj-revisao', 'oficina', [

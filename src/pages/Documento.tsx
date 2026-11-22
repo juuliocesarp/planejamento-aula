@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { ALUNOS_POR_TURMA, DISCIPLINAS, FONTES, PERFIS, PROJETO, TURMAS, disc } from '../data/base';
+import { ALUNOS_POR_TURMA, DISCIPLINAS, FONTES, FONTES_CURRICULO, PERFIS, PROJETO, TURMAS, disc, expandirFontes } from '../data/base';
 import { BIMESTRES, MESES, SEMANAS, fmt, mesDe, type Semana } from '../data/calendario';
 import { caixinha } from '../data/caixinhas';
 import { FASES } from '../data/aulas3bim';
@@ -175,8 +175,10 @@ export function DocumentoImpressao({ pedido, onVoltar }: { pedido: PedidoDoc; on
   const ws = semanasDoPedido(pedido);
   const discs: DiscId[] = pedido.tipo === 'projeto' ? DISCIPLINAS.map((x) => x.id) : [pedido.disc];
   const periodo = descreverPeriodo(pedido, ws);
-  const fontes = new Set<string>(['guia', 'projeto', 'seedf', 'bncc']);
+  const fontes = new Set<string>(['grupo', 'freire', 'fazenda', 'marcuschi', 'seedf', 'bncc', 'ldb']);
   const bimsNoPeriodo = [...new Set(ws.map((w) => w.bim))];
+  discs.forEach((d) => FONTES_CURRICULO[d].forEach((f) => fontes.add(f)));
+  if (discs.some((d) => Object.values(s.discs[d].avaliacao).some((l) => l.length))) ['avaliacao', 'duasfases', 'portfolio'].forEach((f) => fontes.add(f));
   const roteiro = pedido.tipo === 'projeto' ? montarRoteiro(s.discs, s.projeto, ws, periodo) : [];
 
   // Coleta das aulas no período
@@ -187,7 +189,8 @@ export function DocumentoImpressao({ pedido, onVoltar }: { pedido: PedidoDoc; on
     for (const w of ws)
       for (let n = 1; n <= doc.aulasSemana; n++) {
         const a = aulaAtual(d, doc, w.bim, w.n, n);
-        a.fontes.forEach((f) => fontes.add(f));
+        expandirFontes([...a.fontes, ...a.caixinhas.map((c) => caixinha(c)?.fonte ?? '')], d).forEach((f) => fontes.add(f));
+        if (a.metodologia) expandirFontes([metodologia(a.metodologia)?.fonte ?? ''], d).forEach((f) => fontes.add(f));
         out.push({ w, n, a });
       }
     return out;

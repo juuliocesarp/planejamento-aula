@@ -172,7 +172,7 @@ function sugestaoGuia(c: Caixinha) {
   if (c.projeto) return 'Etapa do projeto';
   const b = Math.min(4, Math.ceil(c.semanaGuia / 10));
   const s0 = ((c.semanaGuia - 1) % 10) + 1;
-  return `Guia: ${b}º bim., sem. ${s0}${c.semanasGuia > 1 ? `–${s0 + c.semanasGuia - 1}` : ''}`;
+  return `Currículo sugere: ${b}º bim., sem. ${s0}${c.semanasGuia > 1 ? `–${s0 + c.semanasGuia - 1}` : ''}`;
 }
 
 function CaixinhaArrastavel({ c, origem, doc, onMover, onDurar, onTirar }: { c: Caixinha; origem: 'estante' | 'colocada'; doc: DiscDoc; onMover: (id: string) => void; onDurar?: (id: string, d: number) => void; onTirar?: (id: string) => void }) {

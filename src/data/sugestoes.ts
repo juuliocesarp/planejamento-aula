@@ -10,7 +10,7 @@ export const SUG_PROJETO = {
   objetivoGeral: {
     texto:
       'Promover a compreensão crítica e integrada das relações entre energia, trabalho industrial e crise climática, articulando Física, Geografia, História e Língua Portuguesa a partir de problemas reais do Distrito Federal, por meio da pesquisa e da produção colaborativa de uma revista estudantil por turma, formando sujeitos autônomos, leitores críticos da mídia e produtores conscientes de conhecimento.',
-    fontes: ['projeto'],
+    fontes: ['grupo', 'freire', 'bncc'],
   },
   objetivosEspecificos: {
     texto: [
@@ -23,12 +23,12 @@ export const SUG_PROJETO = {
       'Assumir o protagonismo como sujeito curioso e produtor de conhecimento, superando a postura de receptor passivo (educação libertadora).',
       'Usar a inteligência artificial de forma crítica e ética, reconhecendo seus limites e seu impacto energético.',
     ].join('\n'),
-    fontes: ['projeto', 'freire'],
+    fontes: ['grupo', 'freire', 'bncc'],
   },
   justificativa: {
     texto:
       'Na perspectiva de Paulo Freire, o ato educativo parte da leitura de mundo: das contradições que os estudantes vivem no próprio território. No Distrito Federal, a crise climática não é abstração. Em 2024, Brasília chegou a 164 dias sem chuva, superando o recorde histórico de 1963, segundo o INMET; no mesmo período, a umidade do ar chegou a 7% em uma estação do Gama. Quando falta chuva nos reservatórios, o sistema elétrico aciona usinas termelétricas, mais caras, e a ANEEL aplica a bandeira vermelha patamar 2, que em outubro de 2024 acrescentou R$ 7,877 a cada 100 kWh consumidos. A seca chega, assim, ao corpo e ao orçamento das famílias.\n\nQuestão norteadora: por que as ondas de calor e a seca no Cerrado encarecem a conta de luz em nossas casas, e como as leis físicas da energia, a história da industrialização e a organização desigual do espaço urbano explicam e permitem repensar esse cenário?\n\nA revista responde a duas fragilidades da escola média: a fragmentação curricular, que separa a fórmula do rendimento térmico da história da máquina a vapor e da geografia da energia, e a artificialidade da escrita escolar, feita apenas para receber nota. Ao assumirem o papel de pesquisadores e editores, os estudantes praticam a interdisciplinaridade sem diluir o rigor de cada ciência e escrevem para leitores reais da comunidade escolar.',
-    fontes: ['freire', 'seca2024', 'umidade2024', 'aneel', 'projeto'],
+    fontes: ['freire', 'seca2024', 'umidade2024', 'aneel', 'fazenda', 'marcuschi'],
   },
 };
 
@@ -44,7 +44,7 @@ export const SUG_DISC: Record<DiscId, { objetivoGeral: string; objetivosEspecifi
     ].join('\n'),
     justificativa: 'A Termodinâmica é o "motor" do tema: sem ela, a Revolução Industrial vira só data e a conta de luz vira só número. Ao calcular o rendimento de uma termelétrica e medir o aquecimento do asfalto, o estudante entende fisicamente por que a seca encarece a energia e por que bairros pouco arborizados ficam mais quentes.',
     produto: 'Boxes "A Física por Trás" e infográficos de cada dossiê (rendimento de usinas, albedo, cálculo de kWh), revisados conceitualmente pelos Consultores Científicos.',
-    fontes: ['projeto', 'guia'],
+    fontes: ['grupo', 'guia'],
   },
   geo: {
     objetivoGeral: 'Analisar a industrialização, as matrizes energéticas e a urbanização como processos que organizam o território, relacionando-os à crise climática e à desigualdade socioespacial no Distrito Federal.',
@@ -57,7 +57,7 @@ export const SUG_DISC: Record<DiscId, { objetivoGeral: string; objetivosEspecifi
     ].join('\n'),
     justificativa: 'O espaço é onde a crise climática se distribui de forma desigual. A Geografia permite que o estudante leia o próprio trajeto, o bairro e o DF como resultado de escolhas históricas e econômicas, e transforme dados oficiais em mapas que a comunidade consegue ler.',
     produto: 'Mapas temáticos, dados verificados (IBGE, INMET, EPE, ONS) e entrevistas territoriais em cada dossiê.',
-    fontes: ['projeto', 'guia'],
+    fontes: ['grupo', 'guia'],
   },
   his: {
     objetivoGeral: 'Compreender as revoluções industriais e a modernização brasileira como processos que transformaram o trabalho, a energia e as cidades, reconhecendo os sujeitos que construíram esse percurso.',
@@ -70,7 +70,7 @@ export const SUG_DISC: Record<DiscId, { objetivoGeral: string; objetivosEspecifi
     ].join('\n'),
     justificativa: 'A História mostra que a máquina não é neutra: ela reorganizou o trabalho, o espaço e as relações de poder. Partir da história da família de cada aluno no DF transforma a Revolução Industrial em algo que chega até a cidade onde ele vive.',
     produto: 'Linhas do tempo, curadoria de fontes e contextualização histórica de cada dossiê.',
-    fontes: ['projeto', 'guia'],
+    fontes: ['grupo', 'guia'],
   },
   red: {
     objetivoGeral: 'Desenvolver a produção de textos jornalísticos e de divulgação científica com função social real, conduzindo o processo editorial da revista do planejamento à publicação.',
@@ -84,7 +84,7 @@ export const SUG_DISC: Record<DiscId, { objetivoGeral: string; objetivosEspecifi
     ].join('\n'),
     justificativa: 'Escrever só para o professor dar nota esvazia a escrita. Na revista, o texto tem leitor real, gênero definido e compromisso com a verdade, o que dá sentido à revisão, à curadoria de fontes e à argumentação.',
     produto: 'A revista de cada turma: capa, editorial, sumário, 6 dossiês, seção Cultura e Memória e seção de bastidores e transparência de IA.',
-    fontes: ['projeto', 'guia'],
+    fontes: ['grupo', 'guia'],
   },
   gl: {
     objetivoGeral: 'Mobilizar a análise linguística e a leitura literária do século XIX para dar coesão, precisão e repertório cultural aos textos da revista.',
@@ -97,7 +97,7 @@ export const SUG_DISC: Record<DiscId, { objetivoGeral: string; objetivosEspecifi
     ].join('\n'),
     justificativa: 'A gramática ganha sentido quando serve para ligar seca, reservatório, termelétrica e tarifa numa explicação clara. A literatura realista e naturalista registrou, no século XIX, as mesmas transformações que a Física, a História e a Geografia explicam.',
     produto: 'Revisão linguística de todas as páginas e a seção Cultura, Literatura e Memória (crônicas e ensaios).',
-    fontes: ['projeto', 'guia'],
+    fontes: ['grupo', 'guia'],
   },
 };
 

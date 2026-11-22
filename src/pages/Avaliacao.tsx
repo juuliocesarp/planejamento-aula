@@ -82,7 +82,7 @@ export function Avaliacao() {
           >
             + Adicionar avaliação
           </button>
-          {bim === 3 && itens.some((i) => i.origem !== 'manual') && <Fontes ids={['projeto', 'guia', 'luckesi']} />}
+          {bim === 3 && itens.some((i) => i.origem !== 'manual') && <Fontes ids={['avaliacao', 'duasfases', 'portfolio', 'grupo']} />}
         </div>
       </section>
 

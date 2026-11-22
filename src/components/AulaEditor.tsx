@@ -123,7 +123,7 @@ export function AulaEditor({ d, bim, sem, n, somenteLeitura, onFechar }: { d: Di
         </div>
         {met && (
           <p className="small muted" style={{ margin: 0 }}>
-            {met.resumo} <Fontes ids={[met.fonte]} />
+            {met.resumo} <Fontes ids={[met.fonte]} disc={d} />
           </p>
         )}
         {trocar && (
@@ -215,7 +215,7 @@ export function AulaEditor({ d, bim, sem, n, somenteLeitura, onFechar }: { d: Di
         </div>
 
         <div className="row">
-          <Fontes ids={a.fontes} />
+          <Fontes ids={[...a.fontes, ...a.caixinhas.map((c) => caixinha(c)?.fonte ?? '')]} disc={d} />
           <span className="spacer" />
           {!ro && pronta && a.origem !== 'ia' && (
             <button

@@ -28,7 +28,7 @@ export function Justificativa() {
           />
         </label>
         <div style={{ marginTop: '0.5rem' }}>
-          <VerSugestao texto={sug.justificativa} fontes={sug.fontes} onUsar={(t) => s.atualizarDisc(d, (x) => ({ ...x, justificativa: { valor: t, origem: 'ia' } }))} />
+          <VerSugestao disc={d} texto={sug.justificativa} fontes={sug.fontes} onUsar={(t) => s.atualizarDisc(d, (x) => ({ ...x, justificativa: { valor: t, origem: 'ia' } }))} />
         </div>
         <label className="field" style={{ marginTop: '1.2rem' }}>
           <span>Produto final da disciplina na revista</span>
@@ -39,7 +39,7 @@ export function Justificativa() {
           />
         </label>
         <div style={{ marginTop: '0.5rem' }}>
-          <VerSugestao texto={sug.produto} fontes={sug.fontes} onUsar={(t) => s.atualizarDisc(d, (x) => ({ ...x, produto: { valor: t, origem: 'ia' } }))} />
+          <VerSugestao disc={d} texto={sug.produto} fontes={sug.fontes} onUsar={(t) => s.atualizarDisc(d, (x) => ({ ...x, produto: { valor: t, origem: 'ia' } }))} />
         </div>
       </section>
     </>
