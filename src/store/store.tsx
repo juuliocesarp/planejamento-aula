@@ -71,7 +71,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       for (const d of DISCS) {
         if (pendentes.current['disc:' + d]) continue;
         const v = tudo['disc:' + d] as DiscDoc | undefined;
-        if (v) discs[d] = { ...novoDisc(), ...v };
+        if (v) discs[d] = { ...novoDisc(), ...v, recorte: [...new Set([3, ...(v.recorte ?? [])])].sort() };
       }
       return {
         ...s,

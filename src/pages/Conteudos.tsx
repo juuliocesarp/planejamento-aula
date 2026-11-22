@@ -14,7 +14,7 @@ export function Conteudos() {
   const s = useStore();
   const d = s.minhaDisc!;
   const doc = s.discs[d];
-  const [bim, setBim] = useState(() => doc.recorte[0] ?? 3);
+  const [bim, setBim] = useState(3);
   const [sobrepor, setSobrepor] = useState<DiscId[]>([]);
   const [lado, setLado] = useState<DiscId | ''>('');
   const [estanteAberta, setEstanteAberta] = useState(false);

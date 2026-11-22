@@ -235,6 +235,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ---------- Cartões e blocos ---------- */
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 1.1rem 1.2rem; }
 .card + .card { margin-top: 1rem; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1rem; align-items: stretch; }
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: 1rem; }
 
 /* Sugestão da IA */
@@ -390,3 +391,19 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .doc-acoes { display: none; }
   .folha { box-shadow: none; margin: 0; width: auto; }
 }
+
+/* ---------- Hover em tudo que é escolhível ---------- */
+.perfil-card, .bim-tab, .seg button, .tab, .etapa, .aula-card, .chip:has(input), .btn, label.row:has(input) { transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s; }
+.perfil-card:hover:not(:disabled) { border-color: var(--focus); box-shadow: 0 0 0 1px var(--focus), var(--shadow); }
+.perfil-card[aria-pressed='true'] { border-color: var(--focus); background: color-mix(in srgb, var(--focus) 6%, var(--surface)); }
+.bim-tab:hover { border-color: var(--focus); background: color-mix(in srgb, var(--focus) 5%, var(--surface)); }
+.bim-tab.fixo { cursor: default; border-color: var(--ink); }
+.seg button:hover:not([aria-pressed='true']):not(:disabled) { background: var(--surface-2); }
+.tab:hover { background: var(--surface-2); }
+.etapa:hover:not([aria-current='step']) { background: var(--surface-2); color: var(--ink); }
+.chip:has(input):hover { background: color-mix(in srgb, var(--focus) 12%, var(--surface-2)); }
+label.row:has(input[type='checkbox']), label.row:has(input[type='radio']) { cursor: pointer; border-radius: var(--r-sm); padding: 0.15rem 0.35rem; }
+label.row:has(input[type='checkbox']):hover { background: var(--surface-2); }
+.select:hover, .input:hover, .textarea:hover { border-color: var(--ink-2); }
+.cx:not(.outro):hover { border-color: var(--ink-2); box-shadow: var(--shadow); }
+.grade .cx:hover { box-shadow: var(--shadow); }

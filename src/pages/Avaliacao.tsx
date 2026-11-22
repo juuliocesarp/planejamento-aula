@@ -15,7 +15,7 @@ export function Avaliacao() {
   const s = useStore();
   const d = s.minhaDisc!;
   const doc = s.discs[d];
-  const [bim, setBim] = useState(() => doc.recorte[0] ?? 3);
+  const [bim, setBim] = useState(3);
   const itens = doc.avaliacao[bim] ?? [];
   const total = itens.reduce((t, i) => t + (Number(i.pontos) || 0), 0);
   const sensores = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }));
