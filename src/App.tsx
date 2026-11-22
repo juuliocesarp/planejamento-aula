@@ -101,7 +101,7 @@ export default function App() {
         {tela === 'avaliacao' && <Avaliacao />}
         {tela === 'justificativa' && <Justificativa />}
         {tela === 'documento' && <Documento onGerar={setDoc} />}
-        {tela === 'visao' && <VisaoGeral />}
+        {tela === 'visao' && <VisaoGeral onGerar={setDoc} />}
       </main>
     </>
   );

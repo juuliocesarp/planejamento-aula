@@ -8,6 +8,7 @@ import type { DiscId } from '../data/tipos';
 import { aulaAtual, caixinhasNaSemana, useStore } from '../store/store';
 import type { DiscDoc, ProjetoDoc } from '../store/tipos';
 import { DiscTag } from '../components/ui';
+import { itensDisciplina, percentual } from '../store/progresso';
 
 export interface PedidoDoc {
   tipo: 'disciplina' | 'projeto';
@@ -24,49 +25,60 @@ export function Documento({ onGerar }: { onGerar: (p: PedidoDoc) => void }) {
   const s = useStore();
   const d = s.minhaDisc!;
   const doc = s.discs[d];
-  const [p, setP] = useState<PedidoDoc>({ tipo: 'disciplina', disc: d, modo: 'bimestres', bims: doc.recorte.length ? doc.recorte : [3], meses: [7, 8], bim: 3, de: 1, ate: SEMANAS[3].length });
+  const [p, setP] = useState<PedidoDoc>({ tipo: 'disciplina', disc: d, modo: 'bimestres', bims: [3], meses: [7, 8], bim: 3, de: 1, ate: SEMANAS[3].length });
   const set = (m: Partial<PedidoDoc>) => setP((x) => ({ ...x, ...m }));
-  const pend = pendencias(d, doc, s.projeto);
+  const itens = itensDisciplina(d, doc);
+  const pend = itens.filter((i) => i.feito < 1);
+  const pct = percentual(itens);
 
   return (
     <>
       <div className="page-head">
         <h1>Revisar e gerar documento</h1>
-        <p>Gere o documento de apresentação do plano. Ele abre numa página pronta para imprimir ou salvar em PDF.</p>
+        <p>Confira o que ainda falta e exporte o documento da sua disciplina. Ele abre numa página pronta para imprimir ou salvar em PDF.</p>
       </div>
 
       <section className="card">
-        <h2>Antes de finalizar</h2>
-        {pend.length ? (
-          <ul>
-            {pend.map((x) => (
-              <li key={x.texto}>
-                {x.texto} <a href={'#' + x.etapa}>Ir para a etapa</a>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Tudo preenchido na sua disciplina.</p>
-        )}
-        <p className="small muted">Você pode gerar mesmo com pendências: os campos vazios aparecem destacados como "não preenchido" no documento.</p>
+        <div className="row">
+          <h2 style={{ margin: 0 }}>Antes de finalizar</h2>
+          <span className="spacer" />
+          <span className="num">{pct}% do plano de {disc(d).curto}</span>
+        </div>
+        <div style={{ margin: '0.7rem 0 0.9rem' }}>
+          <div className="barra" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label="Progresso do plano">
+            <i style={{ width: pct + '%' }} />
+          </div>
+        </div>
+        <p className="nota-ok small">
+          ℹ As pendências <strong>não impedem</strong> você de exportar o documento nem de continuar trabalhando. Elas só mostram o que ainda falta. No documento, o que estiver vazio aparece marcado como
+          "não preenchido".
+        </p>
+        <ul className="checklist">
+          {itens.map((x) => (
+            <li key={x.texto} className={x.feito >= 1 ? 'ok' : 'falta'}>
+              <span aria-hidden className="check-ico">
+                {x.feito >= 1 ? '✓' : '○'}
+              </span>
+              <span>{x.texto}</span>
+              {x.feito < 1 && (
+                <a className="small" href={'#' + x.etapa}>
+                  Resolver
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+        {!pend.length && <p className="small" style={{ color: 'var(--ok)', margin: 0 }}>Tudo pronto na sua disciplina. 🎉</p>}
+        <p className="small muted" style={{ margin: '0.6rem 0 0' }}>
+          O documento do projeto inteiro (as 5 disciplinas juntas e o roteiro de apresentação) fica na <a href="#visao">Visão geral do projeto</a>, e é liberado quando todos completarem os planos.
+        </p>
       </section>
 
       <section className="card stack">
-        <h2>Que documento?</h2>
-        <div className="grid2">
-          <button className="perfil-card" aria-pressed={p.tipo === 'disciplina'} onClick={() => set({ tipo: 'disciplina' })}>
-            <strong>
-              Documento de <DiscTag d={d} />
-            </strong>
-            <span className="small">Só a sua disciplina, no recorte escolhido.</span>
-          </button>
-          <button className="perfil-card" aria-pressed={p.tipo === 'projeto'} onClick={() => set({ tipo: 'projeto' })}>
-            <strong>Documento do projeto integrado</strong>
-            <span className="small">As cinco disciplinas juntas, linha do tempo e roteiro de apresentação para os slides.</span>
-          </button>
-        </div>
-
-        <h3>Período</h3>
+        <h2>
+          Exportar seu documento de <DiscTag d={d} />
+        </h2>
+        <h3 style={{ margin: 0 }}>Período</h3>
         <div className="seg">
           {(
             [
@@ -85,7 +97,7 @@ export function Documento({ onGerar }: { onGerar: (p: PedidoDoc) => void }) {
             {BIMESTRES.map((b) => (
               <label key={b.n} className="row">
                 <input type="checkbox" checked={p.bims.includes(b.n)} onChange={() => set({ bims: p.bims.includes(b.n) ? p.bims.filter((x) => x !== b.n) : [...p.bims, b.n].sort() })} />
-                {b.n}º bimestre
+                {b.n}º bimestre{b.n === 3 ? ' (projeto)' : ''}
               </label>
             ))}
           </div>
@@ -121,37 +133,24 @@ export function Documento({ onGerar }: { onGerar: (p: PedidoDoc) => void }) {
             </select>
             até a semana
             <select className="select" style={{ width: 'auto' }} value={p.ate} onChange={(e) => set({ ate: Number(e.target.value) })}>
-              {SEMANAS[p.bim].filter((w) => w.n >= p.de).map((w) => (
-                <option key={w.n} value={w.n}>
-                  {w.n} ({fmt(w.fim)})
-                </option>
-              ))}
+              {SEMANAS[p.bim]
+                .filter((w) => w.n >= p.de)
+                .map((w) => (
+                  <option key={w.n} value={w.n}>
+                    {w.n} ({fmt(w.fim)})
+                  </option>
+                ))}
             </select>
           </div>
         )}
         <div>
-          <button className="btn primary" onClick={() => onGerar({ ...p, disc: d })} disabled={!semanasDoPedido(p).length}>
-            Gerar documento
+          <button className="btn primary" onClick={() => onGerar({ ...p, tipo: 'disciplina', disc: d })} disabled={!semanasDoPedido(p).length}>
+            Exportar documento de {disc(d).curto}
           </button>
         </div>
       </section>
     </>
   );
-}
-
-function pendencias(d: DiscId, doc: DiscDoc, proj: ProjetoDoc) {
-  const out: { texto: string; etapa: string }[] = [];
-  if (!doc.modo) out.push({ texto: 'Escolher o ponto de partida do calendário', etapa: 'recorte' });
-  if (!proj.objetivos.valor.trim()) out.push({ texto: 'Objetivos do projeto sem texto oficial (votação)', etapa: 'objetivos' });
-  if (!doc.objetivoGeral.valor.trim()) out.push({ texto: `Objetivo geral de ${disc(d).nome}`, etapa: 'objetivos' });
-  if (!doc.objetivosEspecificos.some((x) => x.trim())) out.push({ texto: 'Objetivos específicos da disciplina', etapa: 'objetivos' });
-  for (const b of doc.recorte) {
-    const t = (doc.avaliacao[b] ?? []).reduce((a, i) => a + i.pontos, 0);
-    if (t !== 10) out.push({ texto: `Avaliação do ${b}º bimestre soma ${t} de 10 pontos`, etapa: 'avaliacao' });
-  }
-  if (!proj.justificativa.valor.trim()) out.push({ texto: 'Justificativa do projeto sem texto oficial (votação)', etapa: 'justificativa' });
-  if (!doc.justificativa.valor.trim()) out.push({ texto: 'Justificativa da disciplina (obrigatória antes de finalizar)', etapa: 'justificativa' });
-  return out;
 }
 
 function semanasDoPedido(p: PedidoDoc): Semana[] {

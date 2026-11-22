@@ -439,3 +439,94 @@ label.row:has(input[type='checkbox']):hover { background: var(--surface-2); }
 .estante-recolhida { min-height: 1px; }
 .aulas { grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); }
 .rubrica-explica { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0.8rem 1rem; margin-bottom: 0.9rem; }
+
+/* ---------- Identidade: vidro (glassmorphism) nos elementos flutuantes ---------- */
+:root {
+  --glass-bg: color-mix(in srgb, var(--surface) 72%, transparent);
+  --glass-brd: color-mix(in srgb, var(--ink) 14%, transparent);
+  --glass-hl: color-mix(in srgb, #fff 55%, transparent);
+  --glass-shadow: 0 18px 50px -18px rgba(10, 15, 30, 0.45), 0 2px 6px -2px rgba(10, 15, 30, 0.18);
+}
+[data-mode='dark'] {
+  --glass-bg: color-mix(in srgb, var(--surface) 62%, transparent);
+  --glass-brd: color-mix(in srgb, #fff 14%, transparent);
+  --glass-hl: color-mix(in srgb, #fff 10%, transparent);
+  --glass-shadow: 0 22px 60px -20px rgba(0, 0, 0, 0.75);
+}
+.menu-pop, .modal, .fonte-tip, .toast {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid var(--glass-brd);
+  box-shadow: inset 0 1px 0 var(--glass-hl), var(--glass-shadow);
+}
+.fonte-tip, .toast { color: var(--ink); }
+.fonte-tip a { color: var(--focus); }
+.modal-fundo { background: rgba(10, 15, 30, 0.28); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.modal { animation: surge 0.18s ease-out; }
+.menu-pop { animation: surge 0.14s ease-out; }
+@keyframes surge { from { opacity: 0; transform: translateY(6px) scale(0.985); } to { opacity: 1; transform: none; } }
+.estante.aberta { background: var(--glass-bg); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%); }
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+
+/* ---------- Botões ---------- */
+.btn { box-shadow: inset 0 1px 0 var(--glass-hl); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn.primary { box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--ink) 60%, transparent); }
+.btn.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--ink) 88%, var(--focus)); }
+.btn.ia:hover:not(:disabled) { background: color-mix(in srgb, var(--ia) 16%, var(--ia-bg)); }
+
+/* ---------- Listas suspensas (select) ---------- */
+.select {
+  appearance: none; -webkit-appearance: none;
+  padding-right: 2.2rem; cursor: pointer;
+  background-color: var(--glass-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23889' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.8rem center;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 var(--glass-hl);
+}
+.select option { background: var(--surface); color: var(--ink); }
+
+/* ---------- Caixas de marcar e opções ---------- */
+input[type='checkbox'], input[type='radio'] {
+  appearance: none; -webkit-appearance: none; margin: 0; flex: none;
+  width: 1.15rem; height: 1.15rem; border: 1.5px solid var(--ink-2); background: var(--glass-bg);
+  display: inline-grid; place-content: center; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+input[type='checkbox'] { border-radius: 5px; }
+input[type='radio'] { border-radius: 50%; }
+input[type='checkbox']::after {
+  content: ''; width: 0.62rem; height: 0.62rem; transform: scale(0); transition: transform 0.12s;
+  background: var(--paper);
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+input[type='radio']::after { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--paper); transform: scale(0); transition: transform 0.12s; }
+input[type='checkbox']:checked, input[type='radio']:checked { background: var(--ink); border-color: var(--ink); }
+[data-theme='revista'] input[type='checkbox']:checked, [data-theme='revista'] input[type='radio']:checked { background: var(--focus); border-color: var(--focus); }
+input[type='checkbox']:checked::after, input[type='radio']:checked::after { transform: scale(1); }
+input[type='checkbox']:hover:not(:disabled), input[type='radio']:hover:not(:disabled) { border-color: var(--focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 18%, transparent); }
+input[type='checkbox']:disabled, input[type='radio']:disabled { opacity: 0.75; cursor: default; }
+input[type='checkbox']:focus-visible, input[type='radio']:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* ---------- Campos e segmentos ---------- */
+.input, .textarea { background: color-mix(in srgb, var(--surface) 85%, transparent); box-shadow: inset 0 1px 2px color-mix(in srgb, var(--ink) 8%, transparent); }
+.seg { background: var(--glass-bg); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: inset 0 1px 0 var(--glass-hl); }
+
+/* ---------- Checklist e progresso ---------- */
+.nota-ok { background: color-mix(in srgb, var(--focus) 8%, var(--paper)); border: 1px solid color-mix(in srgb, var(--focus) 25%, transparent); border-radius: var(--r-sm); padding: 0.55rem 0.8rem; }
+.checklist { list-style: none; padding: 0; margin: 0.6rem 0; display: grid; gap: 0.35rem; }
+.checklist li { display: flex; gap: 0.55rem; align-items: center; font-size: 0.93rem; }
+.checklist li a { margin-left: auto; }
+.check-ico { width: 1.3rem; height: 1.3rem; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; flex: none; border: 1.5px solid var(--line); color: var(--ink-2); }
+.checklist li.ok .check-ico { background: var(--ok); border-color: var(--ok); color: #fff; }
+.checklist li.ok > span:nth-child(2) { color: var(--ink-2); }
+.progresso-lista { display: grid; gap: 0.3rem; margin-top: 0.6rem; }
+.progresso-cab { width: 100%; display: grid; grid-template-columns: minmax(12rem, 16rem) minmax(5rem, 8rem) 1fr 3rem; gap: 0.8rem; align-items: center; background: none; border: 1px solid transparent; border-radius: var(--r-sm); padding: 0.45rem 0.5rem; cursor: pointer; text-align: left; }
+.progresso-cab:hover { background: var(--surface-2); }
+.progresso-barra { height: 10px; }
+.progresso-linha .checklist { margin: 0.2rem 0 0.6rem 0.8rem; }
+@media (max-width: 700px) { .progresso-cab { grid-template-columns: 1fr 3rem; } .progresso-cab > .small.muted { display: none; } .progresso-barra { grid-column: 1 / -1; } }
+.menu-pop label.row { flex-wrap: nowrap; }
+.menu-pop { width: 19rem; }
