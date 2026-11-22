@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DndContext, PointerSensor, TouchSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { DndContext, MouseSensor, TouchSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { DISCIPLINAS, disc } from '../data/base';
 import { BIMESTRES } from '../data/calendario';
 import { caixinha } from '../data/caixinhas';
@@ -20,7 +20,7 @@ export function Avaliacao() {
   const [bim, setBim] = useState(3);
   const itens = doc.avaliacao[bim] ?? [];
   const total = itens.reduce((t, i) => t + (Number(i.pontos) || 0), 0);
-  const sensores = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }));
+  const sensores = useSensors(useSensor(MouseSensor, { activationConstraint: { distance: 6 } }), useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }));
 
   const setItens = (fn: (x: ItemAvaliacao[]) => ItemAvaliacao[]) => s.atualizarDisc(d, (x) => ({ ...x, avaliacao: { ...x.avaliacao, [bim]: fn(x.avaliacao[bim] ?? []) } }));
   const setItem = (id: string, m: Partial<ItemAvaliacao>) => setItens((l) => l.map((i) => (i.id === id ? { ...i, ...m, origem: i.origem === 'ia' ? 'editado' : i.origem } : i)));

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { PERFIS, PROJETO, disc, type PerfilId } from './data/base';
 import { useStore } from './store/store';
-import { Avatar, DiscTag } from './components/ui';
+import { Avatar, DiscTag, useCamada } from './components/ui';
 import { Recorte } from './pages/Recorte';
 import { Objetivos } from './pages/Objetivos';
 import { Conteudos } from './pages/Conteudos';
@@ -48,6 +48,11 @@ export default function App() {
     addEventListener('hashchange', f);
     return () => removeEventListener('hashchange', f);
   }, []);
+  // O documento para imprimir ocupa a tela toda: o botão voltar do celular volta ao sistema.
+  useCamada(!!doc, () => setDoc(null));
+  useEffect(() => {
+    if (doc) scrollTo({ top: 0 });
+  }, [doc]);
   const ir = (t: Tela) => {
     location.hash = t;
     scrollTo({ top: 0 });
@@ -214,6 +219,7 @@ function MenuPerfil({ tema, setTema, modo, setModo }: ReturnType<typeof usePrefe
   const [aberto, setAberto] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const perfil = PERFIS.find((p) => p.id === s.perfil)!;
+  useCamada(aberto, () => setAberto(false));
   useEffect(() => {
     if (!aberto) return;
     const f = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setAberto(false);

@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { DiscId } from '../data/tipos';
 import type { Ajuda } from '../data/ajudas';
-import { Fontes, Modal } from './ui';
+import { Fontes, Modal, useCamada } from './ui';
 
 export interface OpcaoEscolha {
   id: string;
@@ -91,19 +91,11 @@ export function Escolha({
     };
   }, [aberta, ajuda]);
 
-  // Teclado: setas, Enter, Esc (o Esc da explicação fecha só a explicação).
-  useEffect(() => {
-    if (!aberta || ajuda) return;
-    const tecla = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        setAberta(false);
-        botaoRef.current?.focus();
-      }
-    };
-    document.addEventListener('keydown', tecla, true);
-    return () => document.removeEventListener('keydown', tecla, true);
-  }, [aberta, ajuda]);
+  // Esc e o botão voltar do celular fecham a lista (a explicação é outra camada, por cima).
+  useCamada(aberta, () => {
+    setAberta(false);
+    botaoRef.current?.focus();
+  });
 
   useEffect(() => {
     if (!aberta) return;
@@ -241,10 +233,6 @@ export function Escolha({
               <span className="small muted">{tipoAjuda}</span>
               <h2 style={{ margin: '0.1rem 0 0' }}>{opAjuda.nome}</h2>
             </div>
-            <span className="spacer" />
-            <button type="button" className="btn sm ghost" aria-label="Fechar explicação" onClick={fecharAjuda}>
-              ✕
-            </button>
           </div>
           <div className="ajuda-bloco">
             <h3>Como funciona</h3>

@@ -53,18 +53,14 @@ export function AulaEditor({ d, bim, sem, n, somenteLeitura, onFechar }: { d: Di
 
   return (
     <Modal titulo="Aula" onFechar={onFechar}>
-      <div className="row" style={{ alignItems: 'flex-start' }}>
-        <div>
-          <DiscTag d={d} />
-          <p className="small muted" style={{ margin: 0 }}>
-            {bim}º bimestre · Semana {sem} ({fmt(w.inicio)} a {fmt(w.fim)}) · Aula {n}
-          </p>
+      <div className="modal-cab">
+        <DiscTag d={d} />
+        <p className="small muted" style={{ margin: 0 }}>
+          {bim}º bimestre · Semana {sem} ({fmt(w.inicio)} a {fmt(w.fim)}) · Aula {n}
+        </p>
+        <div style={{ marginTop: '0.35rem' }}>
+          <SeloOrigem origem={a.origem} />
         </div>
-        <span className="spacer" />
-        <SeloOrigem origem={a.origem} />
-        <button className="btn sm ghost" onClick={onFechar} aria-label="Fechar">
-          ✕
-        </button>
       </div>
       {ro && <p className="alerta" style={{ marginTop: '0.6rem' }}>Somente leitura: esta aula é de {disc(d).nome}.</p>}
 

@@ -61,7 +61,7 @@ export function Documento({ onGerar }: { onGerar: (p: PedidoDoc) => void }) {
               </span>
               <span>{x.texto}</span>
               {x.feito < 1 && (
-                <a className="small" href={'#' + x.etapa}>
+                <a className="small resolver" href={'#' + x.etapa}>
                   Resolver
                 </a>
               )}

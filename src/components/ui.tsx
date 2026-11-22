@@ -128,43 +128,93 @@ export function VerSugestao({ texto, fontes, onUsar, rotulo = 'Ver sugestão da 
   );
 }
 
-const pilhaModais: number[] = [];
-let proxModal = 1;
+// ---------- Camadas (modais, listas, gavetas) ----------
+// Cada camada aberta entra numa pilha. Só a do topo responde ao Esc, e o botão
+// "voltar" do celular/navegador fecha a camada do topo em vez de sair da tela.
+type Camada = { id: number; fechar: () => void };
+const camadas: Camada[] = [];
+let proxCamada = 1;
+let entradaNoHistorico = false;
+let ignorarPop = 0;
+function sincronizarHistorico() {
+  window.setTimeout(() => {
+    if (camadas.length && !entradaNoHistorico) {
+      history.pushState({ revistaCamada: true }, '');
+      entradaNoHistorico = true;
+    } else if (!camadas.length && entradaNoHistorico) {
+      entradaNoHistorico = false;
+      ignorarPop++;
+      history.back();
+    }
+  }, 0);
+}
+if (typeof window !== 'undefined') {
+  window.addEventListener('popstate', () => {
+    if (ignorarPop) {
+      ignorarPop--;
+      return;
+    }
+    if (!entradaNoHistorico) return;
+    entradaNoHistorico = false;
+    const topo = camadas.pop();
+    topo?.fechar();
+    sincronizarHistorico();
+  });
+  document.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.key !== 'Escape' || !camadas.length) return;
+      e.stopPropagation();
+      e.preventDefault();
+      const topo = camadas.pop()!;
+      topo.fechar();
+      sincronizarHistorico();
+    },
+    true,
+  );
+}
 
-export function Modal({ titulo, onFechar, children, classe }: { titulo: string; onFechar: () => void; children: ReactNode; classe?: string }) {
-  const fecharRef = useRef(onFechar);
-  fecharRef.current = onFechar;
+/** Registra uma camada aberta (Esc e botão voltar fecham a do topo). */
+export function useCamada(ativa: boolean, fechar: () => void) {
+  const fecharRef = useRef(fechar);
+  fecharRef.current = fechar;
   useEffect(() => {
-    const id = proxModal++;
-    pilhaModais.push(id);
-    // Só o modal do topo responde ao Esc (modal de ajuda aberto por cima de outro).
-    const esc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && pilhaModais[pilhaModais.length - 1] === id) {
-        e.stopPropagation();
-        fecharRef.current();
-      }
+    if (!ativa) return;
+    const c: Camada = { id: proxCamada++, fechar: () => fecharRef.current() };
+    camadas.push(c);
+    sincronizarHistorico();
+    return () => {
+      const i = camadas.indexOf(c);
+      if (i >= 0) camadas.splice(i, 1);
+      sincronizarHistorico();
     };
-    document.addEventListener('keydown', esc);
+  }, [ativa]);
+}
+
+export function Modal({ titulo, onFechar, children, classe, semX }: { titulo: string; onFechar: () => void; children: ReactNode; classe?: string; semX?: boolean }) {
+  useCamada(true, onFechar);
+  useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
-      document.removeEventListener('keydown', esc);
-      pilhaModais.splice(pilhaModais.indexOf(id), 1);
       document.body.style.overflow = prev;
     };
   }, []);
   return createPortal(
     <div className="modal-fundo" onMouseDown={(e) => e.target === e.currentTarget && onFechar()}>
       <div className={'modal' + (classe ? ' ' + classe : '')} role="dialog" aria-modal="true" aria-label={titulo}>
+        {!semX && (
+          <div className="modal-x-barra">
+            <button type="button" className="modal-x" onClick={onFechar} aria-label="Fechar">
+              ✕
+            </button>
+          </div>
+        )}
         {children}
       </div>
     </div>,
     document.body,
   );
-}
-
-export function modalAberto() {
-  return pilhaModais.length;
 }
 
 export function Barra({ valor, max, rotulo }: { valor: number; max: number; rotulo: string }) {

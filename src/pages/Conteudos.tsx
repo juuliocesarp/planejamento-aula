@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { DndContext, PointerSensor, TouchSensor, KeyboardSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { DndContext, DragOverlay, pointerWithin, rectIntersection, type CollisionDetection, MouseSensor, TouchSensor, KeyboardSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { DISCIPLINAS, disc } from '../data/base';
 import { CAIXINHAS, caixinha } from '../data/caixinhas';
 import { BIMESTRES, SEMANAS, fmt, type Semana } from '../data/calendario';
@@ -8,7 +8,7 @@ import { EXPLICACOES } from '../data/explicacoes';
 import type { Caixinha, DiscId, Placement } from '../data/tipos';
 import { aulaAtual, aulaChave, aulaSugerida, aulaVazia, caixinhasNaSemana, placementsDoModo, useStore } from '../store/store';
 import type { DiscDoc } from '../store/tipos';
-import { AvisoIA, DiscTag, Fontes, Modal } from '../components/ui';
+import { AvisoIA, DiscTag, Fontes, Modal, useCamada } from '../components/ui';
 import { AulaEditor } from '../components/AulaEditor';
 
 // Preferências só deste navegador (avisos fechados, estante recolhida).
@@ -50,9 +50,12 @@ export function Conteudos() {
   const [confirmarLimpar, setConfirmarLimpar] = useState(false);
   const [toast, setToast] = useState('');
   const ultimoArraste = useRef(0);
+  const [arrastando, setArrastando] = useState<string | null>(null);
+  useCamada(estanteAberta, () => setEstanteAberta(false));
 
   const sensores = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    // Mouse arrasta logo; no toque é preciso segurar o dedo, para a rolagem da tela funcionar.
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
     useSensor(KeyboardSensor),
   );
@@ -137,7 +140,21 @@ export function Conteudos() {
     avisar('Tudo foi limpo: todos os conteúdos estão na estante e as aulas estão zeradas.');
   };
 
+  const inicioArraste = (e: DragStartEvent) => {
+    ultimoArraste.current = Date.now();
+    setArrastando(String(e.active.id).replace(/^(estante|colocada):/, ''));
+    // No celular a estante cobre as semanas: fecha para dar lugar ao destino.
+    setEstanteAberta(false);
+  };
+  const colocarEAvisar = (id: string, b: number, sem: number) => {
+    colocar(id, b, sem);
+    setEstanteAberta(false);
+    if (b !== bim) setBim(b);
+    avisar(`"${caixinha(id)!.titulo}" foi para o ${b}º bimestre, semana ${sem}.`);
+    window.setTimeout(() => document.getElementById(`semana-${b}-${sem}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120);
+  };
   const fimArraste = (e: DragEndEvent) => {
+    setArrastando(null);
     ultimoArraste.current = Date.now();
     const id = String(e.active.id).replace(/^(estante|colocada):/, '');
     if (!e.over) return;
@@ -167,7 +184,7 @@ export function Conteudos() {
   const comEstante = !lado;
 
   return (
-    <DndContext sensors={sensores} onDragEnd={fimArraste} onDragStart={() => (ultimoArraste.current = Date.now())}>
+    <DndContext sensors={sensores} collisionDetection={colisao} onDragEnd={fimArraste} onDragStart={inicioArraste} onDragCancel={() => setArrastando(null)}>
       <div className="conteudos-topo">
         <h1 style={{ marginBottom: '0.2rem' }}>Conteúdos e aulas</h1>
         <p className="muted small" style={{ margin: 0 }}>
@@ -272,7 +289,8 @@ export function Conteudos() {
       )}
 
       <div className={'cal' + (!comEstante || recolhida ? ' sem-estante' : '')}>
-        {comEstante && <Estante d={d} doc={doc} aberta={estanteAberta} recolhida={recolhida} onMover={setMover} onDetalhe={abrirDetalhe} />}
+        {comEstante && estanteAberta && <div className="estante-veu" onClick={() => setEstanteAberta(false)} aria-hidden="true" />}
+        {comEstante && <Estante d={d} doc={doc} aberta={estanteAberta} recolhida={recolhida} onFechar={() => setEstanteAberta(false)} onMover={setMover} onDetalhe={abrirDetalhe} />}
         <div className={lado ? 'split' : ''}>
           <div>
             {lado && (
@@ -306,7 +324,15 @@ export function Conteudos() {
       </div>
 
       {aula && <AulaEditor {...aula} somenteLeitura={aula.d !== d} onFechar={() => setAula(null)} />}
-      {mover && <MoverPara id={mover} onFechar={() => setMover(null)} onEscolher={(b, sem) => (colocar(mover, b, sem), setMover(null))} onTirar={() => (tirar(mover), setMover(null))} />}
+      {mover && <MoverPara id={mover} noCalendario={!!doc.placements[mover]} bimAtual={bim} onFechar={() => setMover(null)} onEscolher={(b, sem) => (colocarEAvisar(mover, b, sem), setMover(null))} onTirar={() => (tirar(mover), setMover(null), avisar('Conteúdo devolvido para a estante.'))} />}
+      <DragOverlay dropAnimation={null}>
+        {arrastando ? (
+          <div className="cx arraste-sombra" style={{ ['--c' as string]: `var(${disc(d).cor})` }}>
+            <strong>{caixinha(arrastando)!.titulo}</strong>
+            <span className="meta">Solte numa semana</span>
+          </div>
+        ) : null}
+      </DragOverlay>
       {detalhe && (
         <DetalheCaixinha
           id={detalhe.id}
@@ -327,12 +353,18 @@ export function Conteudos() {
   );
 }
 
+// Solta onde o dedo/ponteiro está; se não estiver sobre nada, usa a maior sobreposição.
+const colisao: CollisionDetection = (args) => {
+  const sob = pointerWithin(args);
+  return sob.length ? sob : rectIntersection(args);
+};
+
 function rotuloPos(p?: Placement) {
   if (!p) return 'Fora do calendário sugerido';
   return `${p.bim}º bim., semana ${p.sem}${p.semanas > 1 ? `–${p.sem + p.semanas - 1}` : ''}`;
 }
 
-function Estante({ d, doc, aberta, recolhida, onMover, onDetalhe }: { d: DiscId; doc: DiscDoc; aberta: boolean; recolhida: boolean; onMover: (id: string) => void; onDetalhe: (id: string) => void }) {
+function Estante({ d, doc, aberta, recolhida, onFechar, onMover, onDetalhe }: { d: DiscId; doc: DiscDoc; aberta: boolean; recolhida: boolean; onFechar: () => void; onMover: (id: string) => void; onDetalhe: (id: string) => void }) {
   const { setNodeRef, isOver } = useDroppable({ id: 'estante' });
   const sug = useSugestao(d, doc);
   const livres = CAIXINHAS.filter((c) => c.disc === d && !doc.placements[c.id]).sort((a, b) => {
@@ -358,11 +390,22 @@ function Estante({ d, doc, aberta, recolhida, onMover, onDetalhe }: { d: DiscId;
   let primeiro = true;
   return (
     <aside ref={setNodeRef} className={'card estante' + (aberta ? ' aberta' : '')} style={isOver ? { outline: '2px dashed var(--focus)' } : undefined} aria-label="Estante de conteúdos">
-      <h3>Estante</h3>
+      <div className="estante-cab">
+        <h3>Estante</h3>
+        <button type="button" className="btn sm estante-fechar" onClick={onFechar} aria-label="Fechar estante">
+          ✕ Fechar
+        </button>
+      </div>
       <p className="small muted">
-        {livres.length
-          ? `${livres.length} conteúdos fora do calendário, na ordem recomendada. Arraste para uma semana ou clique para ver os detalhes.`
-          : 'Todos os conteúdos estão no calendário. Arraste um de volta para cá para tirá-lo.'}
+        {livres.length ? (
+          <>
+            {livres.length} conteúdos fora do calendário, na ordem recomendada.{' '}
+            <span className="esconde-mobile">Arraste para uma semana ou clique para ver os detalhes.</span>
+            <span className="so-mobile">Toque em "Colocar no calendário" ou segure e arraste até uma semana.</span>
+          </>
+        ) : (
+          'Todos os conteúdos estão no calendário. Arraste um de volta para cá para tirá-lo.'
+        )}
       </p>
       {[...grupos.entries()].map(([g, lista]) => (
         <div key={g} className="eixo">
@@ -379,14 +422,14 @@ function Estante({ d, doc, aberta, recolhida, onMover, onDetalhe }: { d: DiscId;
 }
 
 function CaixinhaCard({ c, origem, doc, meta, onMover, onDetalhe }: { c: Caixinha; origem: 'estante' | 'colocada'; doc: DiscDoc; meta: string; onMover: (id: string) => void; onDetalhe: (id: string) => void }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: `${origem}:${c.id}` });
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: `${origem}:${c.id}` });
   const p = doc.placements[c.id];
   const curta = p && !c.projeto && p.semanas < c.semanasGuia;
   return (
     <div
       ref={setNodeRef}
       className={'cx clicavel' + (isDragging ? ' arrastando' : '')}
-      style={{ ['--c' as string]: `var(${disc(c.disc).cor})`, transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined, zIndex: isDragging ? 70 : undefined, position: isDragging ? 'relative' : undefined }}
+      style={{ ['--c' as string]: `var(${disc(c.disc).cor})` }}
       {...listeners}
       {...attributes}
       onClick={() => onDetalhe(c.id)}
@@ -401,9 +444,18 @@ function CaixinhaCard({ c, origem, doc, meta, onMover, onDetalhe }: { c: Caixinh
       {c.revista && !c.projeto && <span className="selo-revista">Usado na revista</span>}
       {curta && <span className="meta" style={{ color: 'var(--warn)' }}>Currículo sugere {c.semanasGuia} semanas; aqui tem {p.semanas}.</span>}
       {origem === 'estante' && (
-        <span className="acoes" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
-          <button className="btn sm ghost" onClick={() => onMover(c.id)}>
-            Mover para…
+        <span className="acoes">
+          <button
+            className="btn sm"
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMover(c.id);
+            }}
+          >
+            Colocar no calendário…
           </button>
         </span>
       )}
@@ -493,7 +545,7 @@ function LinhaSemana({
   };
 
   return (
-    <section ref={setNodeRef} className={'semana' + (isOver ? ' alvo' : '')} aria-label={`Semana ${w.n}`}>
+    <section ref={setNodeRef} id={`semana-${w.bim}-${w.n}`} className={'semana' + (isOver ? ' alvo' : '')} aria-label={`Semana ${w.n}`}>
       <div className="semana-cab">
         <strong className="semana-n">Semana {w.n}</strong>
         <span className="muted small">
@@ -646,10 +698,6 @@ function DetalheCaixinha({ id, doc, editavel, onFechar, onMover, onDurar, onTira
             {c.eixo}
           </p>
         </div>
-        <span className="spacer" />
-        <button className="btn sm ghost" onClick={onFechar} aria-label="Fechar">
-          ✕
-        </button>
       </div>
       <h2 style={{ marginTop: '0.6rem' }}>{c.titulo}</h2>
       {explic && (
@@ -700,8 +748,8 @@ function DetalheCaixinha({ id, doc, editavel, onFechar, onMover, onDurar, onTira
       </div>
       {editavel && (
         <div className="row" style={{ marginTop: '1rem' }}>
-          <button className="btn sm" onClick={onMover}>
-            Mover para…
+          <button className="btn sm primary" onClick={onMover}>
+            {p ? 'Mudar de semana…' : 'Colocar no calendário…'}
           </button>
           {p && (
             <>
@@ -724,46 +772,49 @@ function DetalheCaixinha({ id, doc, editavel, onFechar, onMover, onDurar, onTira
   );
 }
 
-function MoverPara({ id, onFechar, onEscolher, onTirar }: { id: string; onFechar: () => void; onEscolher: (b: number, s: number) => void; onTirar: () => void }) {
+function MoverPara({ id, noCalendario, bimAtual, onFechar, onEscolher, onTirar }: { id: string; noCalendario: boolean; bimAtual: number; onFechar: () => void; onEscolher: (b: number, s: number) => void; onTirar: () => void }) {
   const c = caixinha(id)!;
-  const [b, setB] = useState(3);
+  const [b, setB] = useState(bimAtual);
   const [sem, setSem] = useState(1);
   return (
-    <div className="modal-fundo" onMouseDown={(e) => e.target === e.currentTarget && onFechar()}>
-      <div className="modal stack" role="dialog" aria-modal="true" aria-label="Mover conteúdo" style={{ width: 'min(28rem, 100%)' }}>
-        <h3>Mover "{c.titulo}"</h3>
-        <label className="field">
-          <span>Bimestre</span>
-          <select className="select" value={b} onChange={(e) => (setB(Number(e.target.value)), setSem(1))}>
-            {BIMESTRES.map((x) => (
-              <option key={x.n} value={x.n}>
-                {x.n}º bimestre{x.n === 3 ? ' (projeto)' : ''}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>Semana de início</span>
-          <select className="select" value={sem} onChange={(e) => setSem(Number(e.target.value))}>
-            {SEMANAS[b].map((w) => (
-              <option key={w.n} value={w.n}>
-                Semana {w.n} ({fmt(w.inicio)} a {fmt(w.fim)})
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="row">
-          <button className="btn primary" onClick={() => onEscolher(b, sem)}>
-            Mover
-          </button>
+    <Modal titulo="Colocar no calendário" onFechar={onFechar} classe="stack modal-estreito">
+      <h3 style={{ paddingRight: '2.6rem' }}>{noCalendario ? 'Mudar de semana' : 'Colocar no calendário'}</h3>
+      <p className="small muted" style={{ margin: 0 }}>
+        {c.titulo}
+      </p>
+      <label className="field">
+        <span>Bimestre</span>
+        <select className="select" value={b} onChange={(e) => (setB(Number(e.target.value)), setSem(1))}>
+          {BIMESTRES.map((x) => (
+            <option key={x.n} value={x.n}>
+              {x.n}º bimestre{x.n === 3 ? ' (projeto)' : ''}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="field">
+        <span>Semana de início</span>
+        <select className="select" value={sem} onChange={(e) => setSem(Number(e.target.value))}>
+          {SEMANAS[b].map((w) => (
+            <option key={w.n} value={w.n}>
+              Semana {w.n} ({fmt(w.inicio)} a {fmt(w.fim)})
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="row acoes-modal">
+        <button className="btn primary" onClick={() => onEscolher(b, sem)}>
+          {noCalendario ? 'Mudar para esta semana' : 'Colocar nesta semana'}
+        </button>
+        {noCalendario && (
           <button className="btn" onClick={onTirar}>
             Devolver para a estante
           </button>
-          <button className="btn ghost" onClick={onFechar}>
-            Cancelar
-          </button>
-        </div>
+        )}
+        <button className="btn ghost" onClick={onFechar}>
+          Cancelar
+        </button>
       </div>
-    </div>
+    </Modal>
   );
 }

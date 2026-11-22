@@ -219,10 +219,6 @@ function SemanaModal({ d, bim, sem, onFechar, onAbrir }: { d: DiscId; bim: numbe
             {bim}º bimestre · Semana {sem} ({fmt(w.inicio)} a {fmt(w.fim)})
           </p>
         </div>
-        <span className="spacer" />
-        <button className="btn sm ghost" onClick={onFechar} aria-label="Fechar">
-          ✕
-        </button>
       </div>
       <h2 style={{ marginTop: '0.6rem' }}>{cxs.map((c) => caixinha(c.id)!.titulo).join(' + ') || 'Sem conteúdo nesta semana'}</h2>
       <div className="stack">
