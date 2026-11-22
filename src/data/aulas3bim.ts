@@ -78,7 +78,7 @@ const FIS: Semana[] = [
       'Pergunta|8|Por que o asfalto queima o pé e a grama não? Hipóteses.|Pátio|Caderno de bordo',
       'Experimento|25|Deixar ao sol superfícies claras e escuras (papel branco, papel preto, cimento, terra, grama) e medir a temperatura a cada 5 minutos.|Pátio|Termômetros; Papéis branco e preto; Cronômetro',
       'Análise|12|Montar tabela e gráfico; relacionar com absorção, reflexão (albedo) e calor específico.|Pátio|Papel milimetrado',
-      'Conclusão|5|Ligar ao Dossiê 4: por que bairros pouco arborizados do DF ficam mais quentes?|Pátio',
+      'Conclusão|5|Ligar às ilhas de calor: por que bairros pouco arborizados do DF ficam mais quentes?|Pátio',
     ], 'Se houver termômetro infravermelho na escola, use-o; se não, termômetros comuns encostados na superfície funcionam.', ['projeto', 'guia']),
     A('Do kWh ao planeta: consumo e entropia', 'fis-19', 'peer', [
       'Miniexposição|12|E = P · Δt; leitura de potência em etiquetas; selo Procel; entropia como energia que se espalha e não volta a ser útil.||Projetor',
@@ -95,14 +95,14 @@ const FIS: Semana[] = [
       'Checkpoint|10|Registrar no portfólio: o que corrigir e quem corrige.||Portfólio do núcleo',
     ]),
     A('A Física por trás: rascunho do infográfico', 'fis-proj-revisao', 'oficina', [
-      'Planejamento|10|Escolher o fenômeno do dossiê (rendimento de usina, albedo, cálculo de kWh) e o tipo de esquema.||Ficha do gênero',
+      'Planejamento|10|Escolher o fenômeno do tema do núcleo (rendimento de usina, albedo, cálculo de kWh) e o tipo de esquema.||Ficha do gênero',
       'Produção|28|Desenhar à mão o esquema com setas de energia, números e legendas curtas.||Folhas; Lápis de cor',
       'Revisão|12|Troca entre núcleos: o esquema se entende sem o texto?||Ficha de revisão',
     ], 'Cada núcleo da revista tem um box "A Física por Trás", parte da proposta do grupo.'),
   ],
   [
     A('Revisão científica dos rascunhos (2)', 'fis-proj-revisao', 'abp', [
-      'Retomada|5|Semana do Cerrado (05 a 11/09): conferir se o Dossiê 4 usa dados de calor e radiação corretamente.',
+      'Retomada|5|Semana do Cerrado (05 a 11/09): conferir se o texto sobre Cerrado e ilhas de calor usa dados de calor e radiação corretamente.',
       'Mentoria nos núcleos|35|Segunda leitura dos textos já reescritos; foco em unidades e números.||Rascunhos; Ficha de revisão',
       'Checkpoint|10|Atualizar o portfólio do núcleo.||Portfólio do núcleo',
     ], 'A Semana do Cerrado está no calendário oficial da SEEDF (05 a 11/09).', ['projeto', 'seedf']),
@@ -128,7 +128,7 @@ const FIS: Semana[] = [
     A('Checagem final de conceitos', 'fis-proj-fecha', 'abp', [
       'Retomada|5|Checklist final do Consultor Científico.',
       'Checagem|35|Leitura cruzada entre núcleos usando o checklist.||Ficha de revisão',
-      'Registro|10|Declaração de fontes do dossiê.||Portfólio do núcleo',
+      'Registro|10|Declaração de fontes do núcleo.||Portfólio do núcleo',
     ]),
     A('Infográficos na diagramação', 'fis-proj-fecha', 'abp', [
       'Orientação|5|Combinar com o Designer de cada núcleo.',
@@ -161,7 +161,7 @@ const GEO: Semana[] = [
     A('Formação dos núcleos: o Analista Espacial', 'geo-proj-problem', 'expositiva', [
       'Diagnóstico|10|Leitura rápida de um mapa temático: o que a legenda diz? Respostas em cartões.||Mapas; Cartões de resposta',
       'Exposição|20|Escala do local ao global; o papel do Analista Espacial e Cartográfico em cada núcleo.||Projetor',
-      'Atribuição|15|Núcleos confirmam quem é o Analista e qual dossiê vai mapear.||Caderno de bordo',
+      'Atribuição|15|Núcleos confirmam quem é o Analista e qual tema vai mapear.||Caderno de bordo',
       'Combinados|5|Fontes oficiais de dados: IBGE, INMET, EPE, ONS.||Quadro',
     ], undefined, ['projeto']),
   ],
@@ -190,7 +190,7 @@ const GEO: Semana[] = [
       'Caso|10|Brasília foi planejada para o automóvel: ler trecho e observar fotos do plano urbano.||Texto do caso',
       'Análise|25|Grupos analisam consequências para o transporte e o consumo de combustível no DF.||Roteiro de análise',
       'Decisão|15|Se vocês planejassem uma nova cidade hoje, o que mudariam?',
-    ], 'Ponte com o Dossiê 2 (petróleo, motores e rodoviarismo) e com a aula de História sobre o Brasil e o DF (semana 5).', ['projeto']),
+    ], 'Ponte com o tema do petróleo, dos motores e do rodoviarismo e com a aula de História sobre o Brasil e o DF (semana 5).', ['projeto']),
   ],
   [
     A('Matriz energética e matriz elétrica', 'geo-25', 'expositiva', [
@@ -212,7 +212,7 @@ const GEO: Semana[] = [
       'Investigação|12|Quem na sua família trabalha em turnos, por aplicativo ou na rua sob o sol?|Sala em círculo',
       'Tematização|18|Comparar a jornada fabril do século XIX com o trabalho por plataforma hoje.|Sala em círculo|Textos impressos',
       'Problematização|15|O calor extremo muda as condições de trabalho? Para quem?|Sala em círculo',
-      'Registro|5|Ideias para entrevistas do dossiê.|Sala em círculo|Caderno de bordo',
+      'Registro|5|Ideias para entrevistas do núcleo.|Sala em círculo|Caderno de bordo',
     ], 'As entrevistas com trabalhadores são um gênero previsto na revista.', ['guia', 'freire', 'projeto']),
     A('Roteiro de entrevista territorial', 'geo-27', 'oficina', [
       'Planejamento|10|Definir quem entrevistar (familiares, funcionários da escola, moradores antigos).',
@@ -226,7 +226,7 @@ const GEO: Semana[] = [
       'Mentoria|35|Professor circula conferindo números, mapas e escalas nos rascunhos.||Rascunhos; Ficha de revisão',
       'Checkpoint|10|Registro no portfólio.||Portfólio do núcleo',
     ]),
-    A('Mapa temático do dossiê', 'geo-proj-revisao', 'oficina', [
+    A('Mapa temático do núcleo', 'geo-proj-revisao', 'oficina', [
       'Planejamento|10|Escolher o fenômeno e a escala do mapa.',
       'Produção|28|Desenhar o mapa temático com título, legenda, fonte e orientação.||Mapas; Papel',
       'Revisão|12|Troca entre núcleos.||Ficha de revisão',
@@ -237,7 +237,7 @@ const GEO: Semana[] = [
       'Orientação|5|Semana do Cerrado (05 a 11/09), no calendário oficial da SEEDF.',
       'Estação 1|13|Dados de queimadas e desmatamento do Cerrado em fontes oficiais.||Computadores',
       'Estação 2|13|Umidade recorde: em 03/09/2024 a estação de Ponte Alta (Gama) marcou 7%.||Notícia impressa',
-      'Estação 3|13|Mentoria para o Dossiê 4.',
+      'Estação 3|13|Mentoria para o texto sobre o Cerrado e as ilhas de calor.',
       'Fechamento|6|Que dado entra na revista?',
     ], undefined, ['seedf', 'umidade2024']),
     A('Prova contextualizada: fase 1', 'geo-proj-revisao', 'expositiva', [
@@ -260,7 +260,7 @@ const GEO: Semana[] = [
   ],
   [
     A('Checagem final de fontes', 'geo-proj-fecha', 'abp', [
-      'Retomada|5|Lista de fontes do dossiê.',
+      'Retomada|5|Lista de fontes do núcleo.',
       'Checagem|35|Cada dado tem fonte e data?||Ficha de revisão',
       'Registro|10|Referências no padrão combinado.||Portfólio do núcleo',
     ]),
@@ -361,7 +361,7 @@ const HIS: Semana[] = [
       'Mentoria|35|Leitura dos rascunhos.||Ficha de revisão',
       'Checkpoint|10|Registro no portfólio.||Portfólio do núcleo',
     ]),
-    A('Linha do tempo do dossiê', 'his-proj-revisao', 'oficina', [
+    A('Linha do tempo do núcleo', 'his-proj-revisao', 'oficina', [
       'Planejamento|10|Escolher os marcos.',
       'Produção|28|Linha do tempo ilustrada.||Papel',
       'Revisão|12|Troca entre núcleos.||Ficha de revisão',
@@ -426,8 +426,8 @@ const RED: Semana[] = [
       'Registro|5|Pauta inicial.|Sala em círculo|Caderno de bordo',
     ], undefined, ['freire', 'seca2024', 'projeto']),
     A('Nasce a editora', 'red-proj-problem', 'abp', [
-      'Apresentação|5|Cada turma é uma editora; 6 núcleos de 5 alunos; 6 dossiês.',
-      'Formação|35|Núcleos escolhem nome da editora, dossiê e papéis: Editor-Chefe, Curador Histórico, Analista Espacial, Consultor Científico e Designer.||Ficha de papéis',
+      'Apresentação|5|Cada turma é uma editora; 6 núcleos de 5 alunos, cada um com um tema.',
+      'Formação|35|Núcleos escolhem o nome da editora, o tema de cada núcleo e os papéis: Editor-Chefe, Curador Histórico, Analista Espacial, Consultor Científico e Designer.||Ficha de papéis',
       'Registro|10|Ata do núcleo no portfólio.||Portfólio do núcleo',
     ], 'Grupos de 5 com papéis definidos (editor-chefe, curador histórico, analista espacial, consultor científico e designer) ajudam a dividir o trabalho e evitar o "efeito carona".', ['grupo']),
   ],
@@ -451,10 +451,10 @@ const RED: Semana[] = [
       'Teste individual|10|Características de cada gênero.||Folha de teste',
       'Teste em equipe|12|Mesmas questões.||Folha de teste',
       'Esclarecimentos|8|Retomada.||Quadro',
-      'Aplicação|20|Núcleos planejam quais gêneros seu dossiê terá.||Ficha do gênero',
+      'Aplicação|20|Núcleos planejam quais gêneros seu tema terá.||Ficha do gênero',
     ]),
-    A('Pauta do dossiê', 'red-proj-generos', 'oficina', [
-      'Planejamento|10|Pergunta central do dossiê.',
+    A('Pauta do núcleo', 'red-proj-generos', 'oficina', [
+      'Planejamento|10|Pergunta central do tema do núcleo.',
       'Escrita|28|Pauta: títulos provisórios, fontes, entrevistados e responsáveis.||Folhas pautadas',
       'Revisão|12|Editor-Chefe apresenta a pauta à turma.',
     ]),
@@ -501,7 +501,7 @@ const RED: Semana[] = [
       'Orientação|10|Ficha de revisão por pares: clareza, gênero, fontes.||Ficha de revisão',
       'Revisão|28|Núcleos trocam textos.||Ficha de revisão',
       'Devolutiva|12|Conversa entre os núcleos.',
-    ], 'Semana do Cerrado (05 a 11/09): bom momento para o Dossiê 4.', ['projeto', 'seedf']),
+    ], 'Semana do Cerrado (05 a 11/09): bom momento para o núcleo que escreve sobre o Cerrado.', ['projeto', 'seedf']),
     A('Reescrita', 'red-proj-revisao', 'oficina', [
       'Planejamento|10|Ler os comentários recebidos.',
       'Reescrita|30|2ª versão.||Folhas pautadas',

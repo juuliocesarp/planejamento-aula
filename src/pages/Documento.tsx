@@ -392,7 +392,7 @@ export function DocumentoImpressao({ pedido, onVoltar }: { pedido: PedidoDoc; on
       </Folha>
 
       <Folha id="s6" titulo="7. Produto final">
-        <p>{PROJETO.produto}. Cada revista (20 a 24 páginas) reúne capa e expediente, editorial e sumário, 6 dossiês interdisciplinares, a seção Cultura, Literatura e Memória e uma seção de bastidores com referências e transparência sobre o uso de IA.</p>
+        <p>{PROJETO.produto}. Cada revista (20 a 24 páginas) reúne capa e expediente, editorial e sumário, 6 temas interdisciplinares (um por núcleo editorial), a seção Cultura, Literatura e Memória e uma seção de bastidores com referências e transparência sobre o uso de IA.</p>
         {discs.map((d) => (
           <div key={d}>
             <h3>{disc(d).nome}</h3>
@@ -577,8 +577,8 @@ function montarRoteiro(discs: Record<DiscId, DiscDoc>, proj: ProjetoDoc, ws: Sem
   sl.push(
     {
       titulo: 'O produto: a revista',
-      topicos: ['Capa, editorial e sumário', '6 dossiês interdisciplinares', 'Cultura, Literatura e Memória', 'Bastidores: referências e uso transparente de IA', 'Mostra de Editoras com as 4 revistas'],
-      fala: 'Mostrar como cada disciplina aparece dentro de cada dossiê, e que a escrita tem leitor real na comunidade escolar.',
+      topicos: ['Capa, editorial e sumário', '6 temas interdisciplinares, um por núcleo', 'Cultura, Literatura e Memória', 'Bastidores: referências e uso transparente de IA', 'Mostra de Editoras com as 4 revistas'],
+      fala: 'Mostrar como cada disciplina aparece dentro de cada tema da revista, e que a escrita tem leitor real na comunidade escolar.',
     },
     {
       titulo: 'Avaliação',

@@ -1,14 +1,37 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { DndContext, PointerSensor, TouchSensor, KeyboardSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { DISCIPLINAS, disc } from '../data/base';
 import { CAIXINHAS, caixinha } from '../data/caixinhas';
 import { BIMESTRES, SEMANAS, fmt, type Semana } from '../data/calendario';
 import { FASES } from '../data/aulas3bim';
-import type { Caixinha, DiscId } from '../data/tipos';
-import { aulaAtual, caixinhasNaSemana, useStore } from '../store/store';
+import { EXPLICACOES } from '../data/explicacoes';
+import type { Caixinha, DiscId, Placement } from '../data/tipos';
+import { aulaAtual, aulaChave, aulaSugerida, aulaVazia, caixinhasNaSemana, placementsDoModo, useStore } from '../store/store';
 import type { DiscDoc } from '../store/tipos';
-import { AvisoIA, DiscTag } from '../components/ui';
+import { AvisoIA, DiscTag, Fontes, Modal } from '../components/ui';
 import { AulaEditor } from '../components/AulaEditor';
+
+// Preferências só deste navegador (avisos fechados, estante recolhida).
+function lerLocal<T>(k: string, padrao: T): T {
+  try {
+    const v = localStorage.getItem('revista-ui:' + k);
+    return v ? (JSON.parse(v) as T) : padrao;
+  } catch {
+    return padrao;
+  }
+}
+function gravarLocal(k: string, v: unknown) {
+  try {
+    localStorage.setItem('revista-ui:' + k, JSON.stringify(v));
+  } catch {
+    /* sem armazenamento */
+  }
+}
+
+/** Posição sugerida de cada caixinha (ordem lógica recomendada). */
+function useSugestao(d: DiscId, doc: DiscDoc) {
+  return useMemo(() => placementsDoModo(d, doc.modo === 'referencia' ? 'referencia' : 'projeto'), [d, doc.modo]);
+}
 
 export function Conteudos() {
   const s = useStore();
@@ -18,14 +41,25 @@ export function Conteudos() {
   const [sobrepor, setSobrepor] = useState<DiscId[]>([]);
   const [lado, setLado] = useState<DiscId | ''>('');
   const [estanteAberta, setEstanteAberta] = useState(false);
+  const [recolhida, setRecolhida] = useState(() => lerLocal('estante-recolhida', false));
+  const [avisoFechado, setAvisoFechado] = useState(() => lerLocal('aviso-ia', false));
   const [aula, setAula] = useState<{ d: DiscId; bim: number; sem: number; n: number } | null>(null);
   const [mover, setMover] = useState<string | null>(null);
+  const [detalhe, setDetalhe] = useState<{ id: string; d: DiscId } | null>(null);
+  const [confirmarTudo, setConfirmarTudo] = useState(false);
+  const [toast, setToast] = useState('');
+  const ultimoArraste = useRef(0);
 
   const sensores = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
     useSensor(KeyboardSensor),
   );
+
+  const avisar = (t: string) => {
+    setToast(t);
+    window.setTimeout(() => setToast(''), 3500);
+  };
 
   const colocar = (id: string, b: number, sem: number) => {
     const c = caixinha(id)!;
@@ -49,13 +83,54 @@ export function Conteudos() {
       return { ...x, placements: { ...x.placements, [id]: { ...p, semanas: Math.max(1, Math.min(max, p.semanas + delta)) } } };
     });
 
+  /** Preenche as aulas de uma lista de semanas com a sugestão da IA. */
+  const sugerirAulas = (semanas: { bim: number; sem: number }[], substituir: boolean, base?: DiscDoc) => {
+    let n = 0;
+    const x0 = base ?? doc;
+    const aulas = { ...x0.aulas };
+    for (const w of semanas)
+      for (let i = 1; i <= x0.aulasSemana; i++) {
+        const atual = aulaAtual(d, x0, w.bim, w.sem, i);
+        if (!substituir && !aulaVazia(atual)) continue;
+        const sug = aulaSugerida(d, x0, w.bim, w.sem, i);
+        if (!sug) continue;
+        aulas[aulaChave(w.bim, w.sem, i)] = sug;
+        n++;
+      }
+    s.atualizarDisc(d, (x) => ({ ...x, placements: x0.placements, aulas: { ...x.aulas, ...aulas } }));
+    return n;
+  };
+
+  const sugerirTudo = (substituir: boolean) => {
+    setConfirmarTudo(false);
+    let base = doc;
+    // Sem conteúdos no bimestre: coloca os sugeridos primeiro.
+    if (!Object.values(doc.placements).some((p) => p.bim === bim)) {
+      const sug = placementsDoModo(d, doc.modo === 'referencia' ? 'referencia' : 'projeto');
+      const placements = { ...doc.placements };
+      for (const [id, p] of Object.entries(sug)) if (p.bim === bim && !placements[id]) placements[id] = p;
+      base = { ...doc, placements };
+    }
+    const n = sugerirAulas(
+      SEMANAS[bim].map((w) => ({ bim, sem: w.n })),
+      substituir,
+      base,
+    );
+    avisar(n ? `A IA sugeriu ${n} aulas no ${bim}º bimestre. Tudo continua editável.` : 'Não havia aulas vazias para preencher neste bimestre.');
+  };
+
   const fimArraste = (e: DragEndEvent) => {
+    ultimoArraste.current = Date.now();
     const id = String(e.active.id).replace(/^(estante|colocada):/, '');
     if (!e.over) return;
     const alvo = String(e.over.id);
     if (alvo === 'estante') return tirar(id);
     const [, b, sem] = alvo.split(':');
     colocar(id, Number(b), Number(sem));
+  };
+  const abrirDetalhe = (id: string, dd: DiscId = d) => {
+    if (Date.now() - ultimoArraste.current < 300) return;
+    setDetalhe({ id, d: dd });
   };
 
   if (!doc.modo)
@@ -70,33 +145,45 @@ export function Conteudos() {
     );
 
   const outras = DISCIPLINAS.filter((x) => x.id !== d);
-  const mostrarAviso = doc.modo === 'projeto' && bim === 3;
+  const mostrarAviso = doc.modo === 'projeto' && bim === 3 && !avisoFechado;
+  const comEstante = !lado;
 
   return (
-    <DndContext sensors={sensores} onDragEnd={fimArraste}>
-      <div className="page-head">
-        <h1>Conteúdos e aulas</h1>
-        <p>Arraste as caixinhas da estante para as semanas. Toque numa aula para ver e editar os momentos, a metodologia, o tempo, o espaço e os recursos.</p>
+    <DndContext sensors={sensores} onDragEnd={fimArraste} onDragStart={() => (ultimoArraste.current = Date.now())}>
+      <div className="conteudos-topo">
+        <h1 style={{ marginBottom: '0.2rem' }}>Conteúdos e aulas</h1>
+        <p className="muted small" style={{ margin: 0 }}>
+          Arraste os conteúdos da estante para as semanas. Clique num conteúdo para ver o que ele ensina, ou numa aula para planejá-la.
+        </p>
       </div>
 
       <div className="bim-tabs" role="group" aria-label="Bimestre">
-        {BIMESTRES.map((b) => (
-          <button key={b.n} className="bim-tab" aria-pressed={bim === b.n} onClick={() => setBim(b.n)}>
-            {b.n}º bimestre {doc.recorte.includes(b.n) ? '' : <span className="muted small">(fora do recorte)</span>}
-            <small>
-              {fmt(b.inicio)} a {fmt(b.fim)} · {SEMANAS[b.n].length} semanas
-            </small>
-          </button>
-        ))}
+        {BIMESTRES.map((b) => {
+          const projeto = b.n === 3;
+          return (
+            <button key={b.n} className={'bim-tab' + (projeto ? ' bim-projeto' : ' bim-fora')} aria-pressed={bim === b.n} onClick={() => setBim(b.n)}>
+              <span className="row" style={{ gap: '0.4rem' }}>
+                {b.n}º bimestre {projeto && <span className="selo-bim">Projeto</span>}
+              </span>
+              <small>
+                {fmt(b.inicio)} a {fmt(b.fim)} · {SEMANAS[b.n].length} semanas
+              </small>
+            </button>
+          );
+        })}
       </div>
 
-      <div className="row" style={{ marginBottom: '0.8rem' }}>
+      <div className="barra-ferramentas">
+        <button className="btn sm esconde-mobile" onClick={() => (setRecolhida(!recolhida), gravarLocal('estante-recolhida', !recolhida))} disabled={!comEstante}>
+          {recolhida ? 'Mostrar estante' : 'Recolher estante'}
+        </button>
         <button className="btn sm drawer-btn" onClick={() => setEstanteAberta((v) => !v)} aria-expanded={estanteAberta}>
           {estanteAberta ? 'Fechar estante' : 'Abrir estante de conteúdos'}
         </button>
         <details style={{ position: 'relative' }}>
-          <summary className="btn sm">Mostrar outras disciplinas {sobrepor.length ? `(${sobrepor.length})` : ''}</summary>
+          <summary className="btn sm">Ver outras disciplinas {sobrepor.length ? `(${sobrepor.length})` : ''}</summary>
           <div className="menu-pop" style={{ left: 0, right: 'auto' }}>
+            <span className="small muted">Mostra, em cada semana, o que os colegas planejaram.</span>
             {outras.map((o) => (
               <label key={o.id} className="row">
                 <input type="checkbox" checked={sobrepor.includes(o.id)} onChange={() => setSobrepor((v) => (v.includes(o.id) ? v.filter((x) => x !== o.id) : [...v, o.id]))} />
@@ -116,23 +203,67 @@ export function Conteudos() {
             ))}
           </select>
         </label>
+        <span className="spacer" />
+        <button className="btn ia forte" onClick={() => setConfirmarTudo(true)}>
+          ✦ IA: sugerir tudo do {bim}º bimestre
+        </button>
       </div>
 
-      {mostrarAviso && <AvisoIA />}
+      {confirmarTudo && (
+        <div className="alerta row" role="alert" style={{ marginBottom: '0.8rem' }}>
+          <span>
+            A IA vai {Object.values(doc.placements).some((p) => p.bim === bim) ? '' : 'colocar os conteúdos sugeridos e '}sugerir as aulas do {bim}º bimestre. O que fazer com as aulas que já têm conteúdo?
+          </span>
+          <button className="btn sm primary" onClick={() => sugerirTudo(false)}>
+            Preencher só as vazias
+          </button>
+          <button className="btn sm" onClick={() => sugerirTudo(true)}>
+            Substituir todas
+          </button>
+          <button className="btn sm ghost" onClick={() => setConfirmarTudo(false)}>
+            Cancelar
+          </button>
+        </div>
+      )}
 
-      <div className={'cal' + (lado ? ' sem-estante' : '')}>
-        {!lado && <Estante d={d} doc={doc} aberta={estanteAberta} onMover={setMover} />}
+      {mostrarAviso && (
+        <div style={{ position: 'relative' }}>
+          <AvisoIA />
+          <button className="btn sm ghost fechar-aviso" aria-label="Fechar aviso" onClick={() => (setAvisoFechado(true), gravarLocal('aviso-ia', true))}>
+            ✕
+          </button>
+        </div>
+      )}
+
+      <div className={'cal' + (!comEstante || recolhida ? ' sem-estante' : '')}>
+        {comEstante && <Estante d={d} doc={doc} aberta={estanteAberta} recolhida={recolhida} onMover={setMover} onDetalhe={abrirDetalhe} />}
         <div className={lado ? 'split' : ''}>
           <div>
-            {lado && <h3><DiscTag d={d} /> (você)</h3>}
-            <ListaSemanas d={d} doc={doc} bim={bim} editavel sobrepor={sobrepor} onAula={(sem, n) => setAula({ d, bim, sem, n })} onDurar={durar} onTirar={tirar} onMover={setMover} />
+            {lado && (
+              <h3>
+                <DiscTag d={d} /> (você)
+              </h3>
+            )}
+            <ListaSemanas
+              d={d}
+              doc={doc}
+              bim={bim}
+              editavel
+              sobrepor={sobrepor}
+              onAula={(sem, n) => setAula({ d, bim, sem, n })}
+              onDetalhe={abrirDetalhe}
+              onSugerirSemana={(sem, substituir) => {
+                const n = sugerirAulas([{ bim, sem }], substituir);
+                avisar(n ? `A IA sugeriu ${n} ${n === 1 ? 'aula' : 'aulas'} para a semana ${sem}.` : 'As aulas desta semana já estavam preenchidas.');
+              }}
+            />
           </div>
           {lado && (
             <div>
               <h3>
                 <DiscTag d={lado} /> (leitura)
               </h3>
-              <ListaSemanas d={lado} doc={s.discs[lado]} bim={bim} sobrepor={[]} onAula={(sem, n) => setAula({ d: lado, bim, sem, n })} />
+              <ListaSemanas d={lado} doc={s.discs[lado]} bim={bim} sobrepor={[]} onAula={(sem, n) => setAula({ d: lado, bim, sem, n })} onDetalhe={(id) => abrirDetalhe(id, lado)} />
             </div>
           )}
         </div>
@@ -140,82 +271,114 @@ export function Conteudos() {
 
       {aula && <AulaEditor {...aula} somenteLeitura={aula.d !== d} onFechar={() => setAula(null)} />}
       {mover && <MoverPara id={mover} onFechar={() => setMover(null)} onEscolher={(b, sem) => (colocar(mover, b, sem), setMover(null))} onTirar={() => (tirar(mover), setMover(null))} />}
+      {detalhe && (
+        <DetalheCaixinha
+          id={detalhe.id}
+          doc={s.discs[detalhe.d]}
+          editavel={detalhe.d === d}
+          onFechar={() => setDetalhe(null)}
+          onMover={() => (setMover(detalhe.id), setDetalhe(null))}
+          onDurar={(delta) => durar(detalhe.id, delta)}
+          onTirar={() => (tirar(detalhe.id), setDetalhe(null))}
+        />
+      )}
+      {toast && (
+        <div className="toast" role="status">
+          {toast}
+        </div>
+      )}
     </DndContext>
   );
 }
 
-function Estante({ d, doc, aberta, onMover }: { d: DiscId; doc: DiscDoc; aberta: boolean; onMover: (id: string) => void }) {
+function rotuloPos(p?: Placement) {
+  if (!p) return 'Fora do calendário sugerido';
+  return `${p.bim}º bim., semana ${p.sem}${p.semanas > 1 ? `–${p.sem + p.semanas - 1}` : ''}`;
+}
+
+function Estante({ d, doc, aberta, recolhida, onMover, onDetalhe }: { d: DiscId; doc: DiscDoc; aberta: boolean; recolhida: boolean; onMover: (id: string) => void; onDetalhe: (id: string) => void }) {
   const { setNodeRef, isOver } = useDroppable({ id: 'estante' });
-  const livres = CAIXINHAS.filter((c) => c.disc === d && !doc.placements[c.id]);
-  const porEixo = useMemo(() => {
-    const m = new Map<string, Caixinha[]>();
-    for (const c of livres) m.set(c.eixo, [...(m.get(c.eixo) ?? []), c]);
-    return [...m.entries()];
-  }, [livres]);
+  const sug = useSugestao(d, doc);
+  const livres = CAIXINHAS.filter((c) => c.disc === d && !doc.placements[c.id]).sort((a, b) => {
+    const pa = sug[a.id];
+    const pb = sug[b.id];
+    if (!pa && !pb) return a.semanaGuia - b.semanaGuia;
+    if (!pa) return 1;
+    if (!pb) return -1;
+    return pa.bim - pb.bim || pa.sem - pb.sem;
+  });
+  const grupos = new Map<string, Caixinha[]>();
+  for (const c of livres) {
+    const p = sug[c.id];
+    const k = p ? `Sugerido para o ${p.bim}º bimestre` : 'Sem posição sugerida';
+    grupos.set(k, [...(grupos.get(k) ?? []), c]);
+  }
+  if (recolhida)
+    return (
+      <div ref={setNodeRef} className="estante-recolhida esconde-mobile" aria-hidden>
+        {isOver ? 'Solte para devolver' : ''}
+      </div>
+    );
+  let primeiro = true;
   return (
     <aside ref={setNodeRef} className={'card estante' + (aberta ? ' aberta' : '')} style={isOver ? { outline: '2px dashed var(--focus)' } : undefined} aria-label="Estante de conteúdos">
       <h3>Estante</h3>
-      <p className="small muted">{livres.length ? `${livres.length} caixinhas fora do calendário. Arraste para uma semana ou use "Mover para…".` : 'Todas as caixinhas estão no calendário. Arraste uma de volta para cá para tirá-la.'}</p>
-      {porEixo.map(([eixo, lista]) => (
-        <div key={eixo} className="eixo">
-          <p>{eixo}</p>
-          {lista.map((c) => (
-            <CaixinhaArrastavel key={c.id} c={c} origem="estante" doc={doc} onMover={onMover} />
-          ))}
+      <p className="small muted">
+        {livres.length
+          ? `${livres.length} conteúdos fora do calendário, na ordem recomendada. Arraste para uma semana ou clique para ver os detalhes.`
+          : 'Todos os conteúdos estão no calendário. Arraste um de volta para cá para tirá-lo.'}
+      </p>
+      {[...grupos.entries()].map(([g, lista]) => (
+        <div key={g} className="eixo">
+          <p>{g}</p>
+          {lista.map((c) => {
+            const meta = `${primeiro ? 'Próximo na ordem · ' : ''}${rotuloPos(sug[c.id])}`;
+            primeiro = false;
+            return <CaixinhaCard key={c.id} c={c} origem="estante" doc={doc} meta={meta} onMover={onMover} onDetalhe={onDetalhe} />;
+          })}
         </div>
       ))}
     </aside>
   );
 }
 
-function sugestaoGuia(c: Caixinha) {
-  if (c.projeto) return 'Etapa do projeto';
-  const b = Math.min(4, Math.ceil(c.semanaGuia / 10));
-  const s0 = ((c.semanaGuia - 1) % 10) + 1;
-  return `Currículo sugere: ${b}º bim., sem. ${s0}${c.semanasGuia > 1 ? `–${s0 + c.semanasGuia - 1}` : ''}`;
-}
-
-function CaixinhaArrastavel({ c, origem, doc, onMover, onDurar, onTirar }: { c: Caixinha; origem: 'estante' | 'colocada'; doc: DiscDoc; onMover: (id: string) => void; onDurar?: (id: string, d: number) => void; onTirar?: (id: string) => void }) {
+function CaixinhaCard({ c, origem, doc, meta, onMover, onDetalhe }: { c: Caixinha; origem: 'estante' | 'colocada'; doc: DiscDoc; meta: string; onMover: (id: string) => void; onDetalhe: (id: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: `${origem}:${c.id}` });
   const p = doc.placements[c.id];
   const curta = p && !c.projeto && p.semanas < c.semanasGuia;
   return (
     <div
       ref={setNodeRef}
-      className={'cx' + (isDragging ? ' arrastando' : '')}
+      className={'cx clicavel' + (isDragging ? ' arrastando' : '')}
       style={{ ['--c' as string]: `var(${disc(c.disc).cor})`, transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined, zIndex: isDragging ? 70 : undefined, position: isDragging ? 'relative' : undefined }}
       {...listeners}
       {...attributes}
-      aria-label={`Caixinha ${c.titulo}. Arraste para uma semana.`}
+      onClick={() => onDetalhe(c.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onDetalhe(c.id);
+        else listeners?.onKeyDown?.(e);
+      }}
+      aria-label={`${c.titulo}. Arraste para uma semana ou pressione Enter para ver os detalhes.`}
     >
       <strong>{c.titulo}</strong>
-      <span className="meta">
-        {origem === 'colocada' && p ? `${p.semanas} ${p.semanas === 1 ? 'semana' : 'semanas'} · ` : ''}
-        {sugestaoGuia(c)}
-        {c.semanasGuia ? ` · ~${c.semanasGuia * doc.aulasSemana} aulas` : ''}
-      </span>
-      {c.revista && !c.projeto && <span className="selo-revista">Revista: {c.revista}</span>}
-      {curta && <span className="alerta" style={{ padding: '0.15rem 0.4rem', fontSize: '0.75rem' }}>O guia sugere {c.semanasGuia} semanas; aqui tem {p.semanas}.</span>}
-      <span className="acoes" onPointerDown={(e) => e.stopPropagation()}>
-        <button className="btn sm ghost" onClick={() => onMover(c.id)}>
-          Mover para…
-        </button>
-        {origem === 'colocada' && onDurar && (
-          <>
-            <button className="btn sm ghost" aria-label="Diminuir uma semana" onClick={() => onDurar(c.id, -1)}>
-              −
-            </button>
-            <button className="btn sm ghost" aria-label="Aumentar uma semana" onClick={() => onDurar(c.id, 1)}>
-              +
-            </button>
-            <button className="btn sm ghost" aria-label="Devolver para a estante" onClick={() => onTirar?.(c.id)}>
-              ✕
-            </button>
-          </>
-        )}
-      </span>
+      <span className="meta">{meta}</span>
+      {c.revista && !c.projeto && <span className="selo-revista">Usado na revista</span>}
+      {curta && <span className="meta" style={{ color: 'var(--warn)' }}>Currículo sugere {c.semanasGuia} semanas; aqui tem {p.semanas}.</span>}
+      {origem === 'estante' && (
+        <span className="acoes" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
+          <button className="btn sm ghost" onClick={() => onMover(c.id)}>
+            Mover para…
+          </button>
+        </span>
+      )}
     </div>
   );
+}
+
+function lembretesDaSemana(d: DiscId, doc: DiscDoc, bim: number, sem: number) {
+  const aqui = caixinhasNaSemana(doc, bim, sem);
+  const aulas = Array.from({ length: doc.aulasSemana }, (_, i) => aulaAtual(d, doc, bim, sem, i + 1));
+  return aqui.filter(({ id }) => !aulas.some((a) => !aulaVazia(a) && a.caixinhas.includes(id)));
 }
 
 export function ListaSemanas({
@@ -225,9 +388,8 @@ export function ListaSemanas({
   editavel,
   sobrepor,
   onAula,
-  onDurar,
-  onTirar,
-  onMover,
+  onDetalhe,
+  onSugerirSemana,
 }: {
   d: DiscId;
   doc: DiscDoc;
@@ -235,9 +397,8 @@ export function ListaSemanas({
   editavel?: boolean;
   sobrepor: DiscId[];
   onAula: (sem: number, n: number) => void;
-  onDurar?: (id: string, d: number) => void;
-  onTirar?: (id: string) => void;
-  onMover?: (id: string) => void;
+  onDetalhe?: (id: string) => void;
+  onSugerirSemana?: (sem: number, substituir: boolean) => void;
 }) {
   const projeto = doc.modo === 'projeto' && bim === 3;
   return (
@@ -253,59 +414,106 @@ export function ListaSemanas({
       )}
       <div className="semanas">
         {SEMANAS[bim].map((w) => (
-          <LinhaSemana key={w.n} w={w} d={d} doc={doc} editavel={editavel} sobrepor={sobrepor} onAula={onAula} onDurar={onDurar} onTirar={onTirar} onMover={onMover} />
+          <LinhaSemana key={w.n} w={w} d={d} doc={doc} editavel={editavel} sobrepor={sobrepor} onAula={onAula} onDetalhe={onDetalhe} onSugerirSemana={onSugerirSemana} />
         ))}
       </div>
     </div>
   );
 }
 
-function LinhaSemana({ w, d, doc, editavel, sobrepor, onAula, onDurar, onTirar, onMover }: { w: Semana; d: DiscId; doc: DiscDoc; editavel?: boolean; sobrepor: DiscId[]; onAula: (sem: number, n: number) => void; onDurar?: (id: string, d: number) => void; onTirar?: (id: string) => void; onMover?: (id: string) => void }) {
+function LinhaSemana({
+  w,
+  d,
+  doc,
+  editavel,
+  sobrepor,
+  onAula,
+  onDetalhe,
+  onSugerirSemana,
+}: {
+  w: Semana;
+  d: DiscId;
+  doc: DiscDoc;
+  editavel?: boolean;
+  sobrepor: DiscId[];
+  onAula: (sem: number, n: number) => void;
+  onDetalhe?: (id: string) => void;
+  onSugerirSemana?: (sem: number, substituir: boolean) => void;
+}) {
   const s = useStore();
   const { setNodeRef, isOver } = useDroppable({ id: `semana:${w.bim}:${w.n}`, disabled: !editavel });
   const [lamp, setLamp] = useState(false);
+  const [confirmar, setConfirmar] = useState(false);
+  const [fechados, setFechados] = useState<string[]>(() => lerLocal('lembretes', []));
   const aqui = caixinhasNaSemana(doc, w.bim, w.n);
   const nAulas = doc.aulasSemana;
+  const aulas = Array.from({ length: nAulas }, (_, i) => aulaAtual(d, doc, w.bim, w.n, i + 1));
+  const todasCheias = aulas.every((a) => !aulaVazia(a));
+  const lembretes = editavel ? lembretesDaSemana(d, doc, w.bim, w.n).filter(({ id }) => !fechados.includes(`${d}:${w.bim}:${w.n}:${id}`)) : [];
+  const fechar = (id: string) => {
+    const novo = [...fechados, `${d}:${w.bim}:${w.n}:${id}`];
+    setFechados(novo);
+    gravarLocal('lembretes', novo);
+  };
+
   return (
     <section ref={setNodeRef} className={'semana' + (isOver ? ' alvo' : '')} aria-label={`Semana ${w.n}`}>
-      <div className="semana-data">
-        <strong>Semana {w.n}</strong>
-        <span className="muted">
+      <div className="semana-cab">
+        <strong className="semana-n">Semana {w.n}</strong>
+        <span className="muted small">
           {fmt(w.inicio)} a {fmt(w.fim)}
         </span>
+        {w.avisos.map((a) => (
+          <span key={a} className="chip aviso-chip" title="Pode haver uma aula a menos nesta semana">
+            ⚠ {a}
+          </span>
+        ))}
+        {w.datas.map((a) => (
+          <span key={a} className="chip">
+            📅 {a}
+          </span>
+        ))}
+        <span className="spacer" />
+        {editavel && aqui.length > 0 && onSugerirSemana && (
+          <button className="btn sm ia" onClick={() => (todasCheias ? setConfirmar(true) : onSugerirSemana(w.n, false))} title="A IA sugere as aulas desta semana a partir dos conteúdos colocados nela">
+            ✦ Sugerir aulas da semana
+          </button>
+        )}
         {editavel && (
-          <div style={{ marginTop: '0.4rem' }}>
-            <button className="lampada" aria-expanded={lamp} aria-label="O que as outras disciplinas trabalham nesta semana" title="O que as outras disciplinas trabalham nesta semana" onClick={() => setLamp((v) => !v)}>
-              💡
-            </button>
-          </div>
+          <button className="lampada" aria-expanded={lamp} aria-label="O que as outras disciplinas trabalham nesta semana" title="O que as outras disciplinas trabalham nesta semana" onClick={() => setLamp((v) => !v)}>
+            💡
+          </button>
         )}
       </div>
+
+      {confirmar && (
+        <div className="alerta row" role="alert">
+          <span>As aulas desta semana já estão preenchidas. Substituir pela sugestão da IA?</span>
+          <button className="btn sm primary" onClick={() => (onSugerirSemana?.(w.n, true), setConfirmar(false))}>
+            Substituir
+          </button>
+          <button className="btn sm ghost" onClick={() => setConfirmar(false)}>
+            Cancelar
+          </button>
+        </div>
+      )}
+
       <div className="semana-corpo">
-        {(w.avisos.length > 0 || w.datas.length > 0) && (
-          <div className="row small">
-            {w.avisos.map((a) => (
-              <span key={a} className="alerta" style={{ padding: '0.1rem 0.5rem' }}>
-                {a} · pode haver uma aula a menos
-              </span>
-            ))}
-            {w.datas.map((a) => (
-              <span key={a} className="chip">
-                📅 {a}
-              </span>
-            ))}
-          </div>
-        )}
         <div className="coloc">
-          {aqui.map(({ id, inicio }) => {
+          {aqui.map(({ id, p, inicio }) => {
             const c = caixinha(id)!;
-            return inicio && editavel ? (
-              <CaixinhaArrastavel key={id} c={c} origem="colocada" doc={doc} onMover={onMover!} onDurar={onDurar} onTirar={onTirar} />
-            ) : (
-              <div key={id} className="cx outro" style={{ ['--c' as string]: `var(${disc(c.disc).cor})` }}>
+            const ordem = w.n - p.sem + 1;
+            if (inicio && editavel)
+              return <CaixinhaCard key={id} c={c} origem="colocada" doc={doc} meta={`${p.semanas} ${p.semanas === 1 ? 'semana' : 'semanas'} · ~${p.semanas * nAulas} aulas · clique para detalhes`} onMover={() => {}} onDetalhe={onDetalhe ?? (() => {})} />;
+            return (
+              <button key={id} className={'cx' + (inicio ? '' : ' continua')} style={{ ['--c' as string]: `var(${disc(c.disc).cor})` }} onClick={() => onDetalhe?.(id)}>
+                {!inicio && (
+                  <span className="meta continua-rotulo">
+                    ↳ Continuação · semana {ordem} de {p.semanas} deste conteúdo
+                  </span>
+                )}
                 <strong>{c.titulo}</strong>
-                {!inicio && <span className="meta">continuação</span>}
-              </div>
+              </button>
             );
           })}
           {sobrepor.flatMap((o) =>
@@ -319,21 +527,43 @@ function LinhaSemana({ w, d, doc, editavel, sobrepor, onAula, onDurar, onTirar, 
               );
             }),
           )}
-          {!aqui.length && editavel && <span className="small muted">Solte uma caixinha aqui.</span>}
+          {!aqui.length && editavel && <span className="soltar-aqui">Solte um conteúdo aqui</span>}
         </div>
-        <div className="aulas">
-          {Array.from({ length: nAulas }, (_, i) => i + 1).map((n) => {
-            const a = aulaAtual(d, doc, w.bim, w.n, n);
-            return (
-              <button key={n} className={'aula-card' + (a.origem === 'ia' ? ' ia' : '')} onClick={() => onAula(w.n, n)}>
-                <span className="n">
-                  Aula {n} · {a.duracao} min {a.origem === 'ia' ? '· ✦ IA' : a.origem === 'editado' ? '· editada' : ''}
-                </span>
-                {a.titulo ? <span className="t">{a.titulo}</span> : <span className="vazia">{editavel ? 'Planejar esta aula' : 'Não planejada'}</span>}
+
+        {lembretes.map(({ id, p }) => {
+          const c = caixinha(id)!;
+          const continua = p.sem !== w.n;
+          return (
+            <div key={id} className="lembrete" role="note">
+              <span>
+                {continua ? (
+                  <>
+                    <strong>{c.titulo}</strong> continua nesta semana. Lembre de fazer as aulas abordarem esse conteúdo.
+                  </>
+                ) : (
+                  <>
+                    As aulas desta semana ainda não tratam de <strong>{c.titulo}</strong>.
+                  </>
+                )}
+              </span>
+              <button className="btn sm ghost" aria-label="Fechar lembrete" onClick={() => fechar(id)}>
+                ✕
               </button>
-            );
-          })}
+            </div>
+          );
+        })}
+
+        <div className="aulas">
+          {aulas.map((a, i) => (
+            <button key={i} className={'aula-card' + (a.origem === 'ia' ? ' ia' : '')} onClick={() => onAula(w.n, i + 1)}>
+              <span className="n">
+                Aula {i + 1} · {a.duracao} min {a.origem === 'ia' ? '· ✦ IA' : a.origem === 'editado' ? '· editada' : ''}
+              </span>
+              {a.titulo ? <span className="t">{a.titulo}</span> : <span className="vazia">{editavel ? 'Planejar esta aula' : 'Não planejada'}</span>}
+            </button>
+          ))}
         </div>
+
         {lamp && (
           <div className="acordeao">
             {DISCIPLINAS.filter((x) => x.id !== d).map((o) => {
@@ -366,20 +596,112 @@ function LinhaSemana({ w, d, doc, editavel, sobrepor, onAula, onDurar, onTirar, 
   );
 }
 
+function DetalheCaixinha({ id, doc, editavel, onFechar, onMover, onDurar, onTirar }: { id: string; doc: DiscDoc; editavel: boolean; onFechar: () => void; onMover: () => void; onDurar: (d: number) => void; onTirar: () => void }) {
+  const c = caixinha(id)!;
+  const p = doc.placements[id];
+  const explic = EXPLICACOES[id];
+  const curric = c.projeto ? null : `${Math.min(4, Math.ceil(c.semanaGuia / 10))}º bimestre, ${c.semanasGuia} semanas`;
+  return (
+    <Modal titulo={c.titulo} onFechar={onFechar}>
+      <div className="row" style={{ alignItems: 'flex-start' }}>
+        <div>
+          <DiscTag d={c.disc} />
+          <p className="small muted" style={{ margin: 0 }}>
+            {c.eixo}
+          </p>
+        </div>
+        <span className="spacer" />
+        <button className="btn sm ghost" onClick={onFechar} aria-label="Fechar">
+          ✕
+        </button>
+      </div>
+      <h2 style={{ marginTop: '0.6rem' }}>{c.titulo}</h2>
+      {explic && (
+        <div className="ia-box" style={{ marginBottom: '0.9rem' }}>
+          <span className="ia-badge">Explicação da IA</span>
+          <p style={{ margin: '0.4rem 0' }}>{explic}</p>
+          <Fontes ids={[c.fonte]} disc={c.disc} />
+        </div>
+      )}
+      <div className="grid2">
+        <div>
+          <h3>O que se estuda</h3>
+          <ul style={{ marginTop: 0 }}>
+            {c.subtemas.map((x) => (
+              <li key={x}>{x}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="stack" style={{ gap: '0.5rem' }}>
+          <div>
+            <h3 style={{ marginBottom: '0.2rem' }}>Como trabalhar</h3>
+            <p className="small" style={{ margin: 0 }}>
+              {c.foco}
+            </p>
+          </div>
+          {c.revista && (
+            <div>
+              <h3 style={{ marginBottom: '0.2rem' }}>Na revista</h3>
+              <p className="small" style={{ margin: 0 }}>
+                {c.revista}
+              </p>
+            </div>
+          )}
+          {c.bncc.length > 0 && (
+            <p className="small" style={{ margin: 0 }}>
+              <strong>Habilidades da BNCC:</strong> {c.bncc.join(', ')}
+            </p>
+          )}
+          {curric && (
+            <p className="small" style={{ margin: 0 }}>
+              <strong>Nos currículos de referência:</strong> {curric}
+            </p>
+          )}
+          <p className="small" style={{ margin: 0 }}>
+            <strong>No seu calendário:</strong> {p ? rotuloPos(p) : 'na estante (fora do calendário)'}
+          </p>
+        </div>
+      </div>
+      {editavel && (
+        <div className="row" style={{ marginTop: '1rem' }}>
+          <button className="btn sm" onClick={onMover}>
+            Mover para…
+          </button>
+          {p && (
+            <>
+              <span className="small muted">Duração:</span>
+              <button className="btn sm" aria-label="Diminuir uma semana" onClick={() => onDurar(-1)}>
+                − semana
+              </button>
+              <span className="num">{p.semanas}</span>
+              <button className="btn sm" aria-label="Aumentar uma semana" onClick={() => onDurar(1)}>
+                + semana
+              </button>
+              <button className="btn sm ghost" onClick={onTirar}>
+                Devolver para a estante
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </Modal>
+  );
+}
+
 function MoverPara({ id, onFechar, onEscolher, onTirar }: { id: string; onFechar: () => void; onEscolher: (b: number, s: number) => void; onTirar: () => void }) {
   const c = caixinha(id)!;
   const [b, setB] = useState(3);
   const [sem, setSem] = useState(1);
   return (
     <div className="modal-fundo" onMouseDown={(e) => e.target === e.currentTarget && onFechar()}>
-      <div className="modal stack" role="dialog" aria-modal="true" aria-label="Mover caixinha" style={{ width: 'min(28rem, 100%)' }}>
+      <div className="modal stack" role="dialog" aria-modal="true" aria-label="Mover conteúdo" style={{ width: 'min(28rem, 100%)' }}>
         <h3>Mover "{c.titulo}"</h3>
         <label className="field">
           <span>Bimestre</span>
           <select className="select" value={b} onChange={(e) => (setB(Number(e.target.value)), setSem(1))}>
             {BIMESTRES.map((x) => (
               <option key={x.n} value={x.n}>
-                {x.n}º bimestre
+                {x.n}º bimestre{x.n === 3 ? ' (projeto)' : ''}
               </option>
             ))}
           </select>

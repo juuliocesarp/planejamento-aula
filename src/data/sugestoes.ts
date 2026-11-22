@@ -43,7 +43,7 @@ export const SUG_DISC: Record<DiscId, { objetivoGeral: string; objetivosEspecifi
       'Garantir a correção conceitual dos textos e infográficos da revista como Consultor Científico.',
     ].join('\n'),
     justificativa: 'A Termodinâmica é o "motor" do tema: sem ela, a Revolução Industrial vira só data e a conta de luz vira só número. Ao calcular o rendimento de uma termelétrica e medir o aquecimento do asfalto, o estudante entende fisicamente por que a seca encarece a energia e por que bairros pouco arborizados ficam mais quentes.',
-    produto: 'Boxes "A Física por Trás" e infográficos de cada dossiê (rendimento de usinas, albedo, cálculo de kWh), revisados conceitualmente pelos Consultores Científicos.',
+    produto: 'Boxes "A Física por Trás" e infográficos de cada núcleo (rendimento de usinas, albedo, cálculo de kWh), revisados conceitualmente pelos Consultores Científicos.',
     fontes: ['grupo', 'guia'],
   },
   geo: {
@@ -56,7 +56,7 @@ export const SUG_DISC: Record<DiscId, { objetivoGeral: string; objetivosEspecifi
       'Produzir mapas temáticos com título, legenda, escala e fonte para a revista.',
     ].join('\n'),
     justificativa: 'O espaço é onde a crise climática se distribui de forma desigual. A Geografia permite que o estudante leia o próprio trajeto, o bairro e o DF como resultado de escolhas históricas e econômicas, e transforme dados oficiais em mapas que a comunidade consegue ler.',
-    produto: 'Mapas temáticos, dados verificados (IBGE, INMET, EPE, ONS) e entrevistas territoriais em cada dossiê.',
+    produto: 'Mapas temáticos, dados verificados (IBGE, INMET, EPE, ONS) e entrevistas territoriais em cada núcleo.',
     fontes: ['grupo', 'guia'],
   },
   his: {
@@ -69,7 +69,7 @@ export const SUG_DISC: Record<DiscId, { objetivoGeral: string; objetivosEspecifi
       'Usar fontes históricas com crítica e crédito correto na revista.',
     ].join('\n'),
     justificativa: 'A História mostra que a máquina não é neutra: ela reorganizou o trabalho, o espaço e as relações de poder. Partir da história da família de cada aluno no DF transforma a Revolução Industrial em algo que chega até a cidade onde ele vive.',
-    produto: 'Linhas do tempo, curadoria de fontes e contextualização histórica de cada dossiê.',
+    produto: 'Linhas do tempo, curadoria de fontes e contextualização histórica de cada núcleo.',
     fontes: ['grupo', 'guia'],
   },
   red: {
@@ -83,7 +83,7 @@ export const SUG_DISC: Record<DiscId, { objetivoGeral: string; objetivosEspecifi
       'Usar IA como revisora crítica, nunca como autora.',
     ].join('\n'),
     justificativa: 'Escrever só para o professor dar nota esvazia a escrita. Na revista, o texto tem leitor real, gênero definido e compromisso com a verdade, o que dá sentido à revisão, à curadoria de fontes e à argumentação.',
-    produto: 'A revista de cada turma: capa, editorial, sumário, 6 dossiês, seção Cultura e Memória e seção de bastidores e transparência de IA.',
+    produto: 'A revista de cada turma: capa, editorial, sumário, 6 temas (um por núcleo), seção Cultura e Memória e seção de bastidores e transparência de IA.',
     fontes: ['grupo', 'guia'],
   },
   gl: {

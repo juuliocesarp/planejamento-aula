@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { PERFIS, type PerfilId } from '../data/base';
 import type { DiscId, Placement } from '../data/tipos';
-import { CAIXINHAS } from '../data/caixinhas';
+import { CAIXINHAS, caixinha as _cx } from '../data/caixinhas';
+import { metodologia as _met } from '../data/metodologias';
 import { AULAS_3BIM, LAYOUT_PROJETO } from '../data/aulas3bim';
 import { SEMANAS, semanaGuiaParaPos } from '../data/calendario';
 import { backend } from './backend';
@@ -294,4 +295,54 @@ export function aulaAtual(d: DiscId, doc: DiscDoc, bim: number, sem: number, n: 
     fontes: [],
     origem: 'manual',
   };
+}
+
+// ---------- Sugestão automática de aulas (IA) ----------
+
+function metodoDaCaixinha(foco: string, primeira: boolean) {
+  if (primeira) return 'expositiva';
+  const f = foco.toLowerCase();
+  if (/experiment|protótipo|pêndulo|câmara escura|medição|feixe/.test(f)) return 'experimento';
+  if (/peer|testes conceituais/.test(f)) return 'peer';
+  if (/debate|audiência/.test(f)) return 'debate';
+  if (/estudo de caso|caso /.test(f)) return 'caso';
+  if (/seminário|feira|mostra|sarau/.test(f)) return 'seminario';
+  if (/simula|sensores/.test(f)) return 'estacoes';
+  if (/círculo de cultura/.test(f)) return 'freire';
+  if (/reescrita|produção|oficina|laboratório|redação|resenha|carta/.test(f)) return 'oficina';
+  if (/mapeamento|cartogr|mapas|pesquisa-ação|investiga/.test(f)) return 'pbl';
+  if (/clube de leitura|leitura/.test(f)) return 'tbl';
+  return 'phc';
+}
+
+/** Gera a sugestão de uma aula a partir das caixinhas da semana. */
+export function aulaSugerida(d: DiscId, doc: DiscDoc, bim: number, sem: number, n: number): AulaEstado | null {
+  const pronta = aulaPronta(d, doc, bim, sem, n);
+  const aqui = caixinhasNaSemana(doc, bim, sem);
+  if (pronta && aqui.some((c) => c.id === pronta.caixinhas[0])) return pronta;
+  if (!aqui.length) return null;
+  const alvo = aqui[(n - 1) % aqui.length];
+  const c = _cx(alvo.id)!;
+  const total = alvo.p.semanas * doc.aulasSemana;
+  const idx = (sem - alvo.p.sem) * doc.aulasSemana + Math.floor((n - 1) / aqui.length);
+  const si = Math.min(c.subtemas.length - 1, Math.floor((idx * c.subtemas.length) / Math.max(1, total)));
+  const sub = c.subtemas[si];
+  const porSub = Math.ceil(Math.max(1, total) / c.subtemas.length);
+  const parte = porSub > 1 ? idx - Math.floor((si * Math.max(1, total)) / c.subtemas.length) + 1 : 0;
+  const metId = metodoDaCaixinha(c.foco, idx === 0);
+  const met = _met(metId)!;
+  return {
+    titulo: (c.subtemas.length > 1 ? `${c.titulo}: ${sub}` : c.titulo) + (parte > 1 ? ` (continuação)` : ''),
+    metodologia: metId,
+    momentos: met.momentos.map((m, i) => ({ ...m, recursos: [...m.recursos], desc: i === 0 ? `${m.desc} Tema da aula: ${sub}.` : m.desc })),
+    duracao: 50,
+    caixinhas: [c.id],
+    dica: `Sugestão do currículo para este conteúdo: ${c.foco}`,
+    fontes: [c.fonte, met.fonte],
+    origem: 'ia',
+  };
+}
+
+export function aulaVazia(a: AulaEstado) {
+  return !a.titulo.trim() && !a.momentos.length;
 }

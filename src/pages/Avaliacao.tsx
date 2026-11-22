@@ -47,8 +47,10 @@ export function Avaliacao() {
       </div>
       <div className="bim-tabs">
         {BIMESTRES.map((b) => (
-          <button key={b.n} className="bim-tab" aria-pressed={bim === b.n} onClick={() => setBim(b.n)}>
-            {b.n}º bimestre
+          <button key={b.n} className={'bim-tab' + (b.n === 3 ? ' bim-projeto' : ' bim-fora')} aria-pressed={bim === b.n} onClick={() => setBim(b.n)}>
+            <span className="row" style={{ gap: '0.4rem' }}>
+              {b.n}º bimestre {b.n === 3 && <span className="selo-bim">Projeto</span>}
+            </span>
             <small>{fmtN((doc.avaliacao[b.n] ?? []).reduce((t, i) => t + i.pontos, 0))} de 10 pontos</small>
           </button>
         ))}
@@ -195,15 +197,27 @@ function Rubrica() {
   const d = s.minhaDisc!;
   const doc = s.discs[d];
   const soma = doc.rubrica.reduce((t, c) => t + c.pontos, 0);
+  const itemRubrica = (doc.avaliacao[3] ?? []).find((i) => i.forma === 'rubrica');
+  const valorRevista = itemRubrica ? itemRubrica.pontos : null;
   const set = (fn: (r: typeof doc.rubrica) => typeof doc.rubrica) => s.atualizarDisc(d, (x) => ({ ...x, rubrica: fn(x.rubrica) }));
   return (
     <section className="card">
-      <h2>Rubrica compartilhada da revista</h2>
-      <p className="small muted">Uma rubrica só, avaliada por todas as disciplinas. Cada professor define os critérios e os pontos da própria área; você vê as outras áreas, mas edita só a sua.</p>
+      <h2>Como dar nota para a revista (rubrica)</h2>
+      <div className="rubrica-explica small">
+        <p>
+          <strong>Para que serve:</strong> a revista é um trabalho só, mas vale nota em todas as disciplinas. A rubrica é a lista do que você vai olhar na revista para dar a <strong>sua</strong> nota,
+          com quantos pontos vale cada coisa. Assim os alunos sabem antes o que será cobrado, e cada professor corrige a mesma revista olhando para a própria área.
+        </p>
+        <p style={{ margin: 0 }}>
+          <strong>Exemplo em {disc(d).curto}:</strong> se a avaliação "Revista" vale 3 pontos no bimestre, você pode dividir em 3 critérios de 1 ponto cada
+          {SUG_RUBRICA[d][0] ? ` (por exemplo: "${SUG_RUBRICA[d][0]}")` : ''}. A soma dos seus critérios deve ser igual ao valor da avaliação "Revista" acima.
+        </p>
+      </div>
       <div className="grid2">
         {DISCIPLINAS.map((x) => {
           const r = s.discs[x.id].rubrica;
           const minha = x.id === d;
+          if (!minha && !r.length) return null;
           return (
             <div key={x.id} className="momento">
               <div className="row">
@@ -233,7 +247,10 @@ function Rubrica() {
                       </button>
                     )}
                   </div>
-                  <span className="small muted">Soma dos seus critérios: {fmtN(soma)} pontos. Combine com o valor da avaliação "Revista" no bimestre.</span>
+                  <span className="small muted">
+                    Soma dos seus critérios: <strong>{fmtN(soma)}</strong> {valorRevista !== null ? `· avaliação "Revista" no 3º bimestre: ${fmtN(valorRevista)}` : '· adicione uma avaliação do tipo "Avaliação por rubrica" no 3º bimestre'}
+                    {valorRevista !== null && valorRevista !== soma && <span style={{ color: 'var(--warn)' }}> (os valores não batem)</span>}
+                  </span>
                 </div>
               )}
             </div>
