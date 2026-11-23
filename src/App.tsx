@@ -43,6 +43,10 @@ export default function App() {
   const [tela, setTela] = useState<Tela>(() => (location.hash.slice(1) as Tela) || 'conteudos');
   const [doc, setDoc] = useState<PedidoDoc | null>(null);
 
+  // A cor da disciplina de quem está usando vira a cor de destaque do tema Sóbrio.
+  useEffect(() => {
+    document.documentElement.dataset.disc = s.minhaDisc ?? '';
+  }, [s.minhaDisc]);
   useEffect(() => {
     const f = () => setTela((location.hash.slice(1) as Tela) || 'conteudos');
     addEventListener('hashchange', f);

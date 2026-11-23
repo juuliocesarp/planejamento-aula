@@ -52,60 +52,73 @@
   --shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.6);
   color-scheme: dark;
 }
+/* Sóbrio: cinzas neutros e de baixo contraste; a cor aparece só nos pontos de
+   contato (botões, seleção, foco, progresso), na cor da disciplina de quem usa. */
 [data-theme='sobrio'][data-mode='light'] {
-  --paper: #f4f4f5;
-  --surface: #ffffff;
-  --surface-2: #e9e9eb;
-  --ink: #18181b;
-  --ink-2: #57575e;
-  --line: #d4d4d8;
-  --focus: #18181b;
-  --thermal: linear-gradient(90deg, #a1a1aa, #18181b);
-  --cold: #71717a;
-  --hot: #18181b;
-  --ia: #52525b;
-  --ia-bg: #f0f0f1;
-  --ok: #2e7d4f;
-  --warn: #9a3412;
-  --warn-bg: #f6eee9;
-  --c-fis: #c2410c;
-  --c-geo: #3f6b2e;
-  --c-his: #8a4024;
-  --c-red: #1d4ed8;
-  --c-gl: #86198f;
+  --paper: #f1f2f4;
+  --surface: #fbfbfc;
+  --surface-2: #e7e8eb;
+  --ink: #2e3035;
+  --ink-2: #6b6e76;
+  --line: #dcdee2;
+  --c-fis: #c4612f;
+  --c-geo: #4d7a3c;
+  --c-his: #96573c;
+  --c-red: #3b64a8;
+  --c-gl: #8b3f6c;
+  --accent: #5b6170;
+  --focus: var(--accent);
+  --on-accent: #ffffff;
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  --thermal: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--surface)));
+  --cold: var(--accent);
+  --hot: var(--accent);
+  --ia: #6a6c86;
+  --ia-bg: #f0f0f4;
+  --ok: #3f7d58;
+  --warn: #9a5a1e;
+  --warn-bg: #f6efe6;
   --display: 'IBM Plex Sans', system-ui, sans-serif;
-  --r-lg: 8px;
-  --r-sm: 4px;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --r-lg: 10px;
+  --r-sm: 6px;
+  --shadow: 0 1px 2px rgba(30, 32, 38, 0.06), 0 4px 14px -8px rgba(30, 32, 38, 0.14);
   color-scheme: light;
 }
 [data-theme='sobrio'][data-mode='dark'] {
-  --paper: #09090b;
-  --surface: #18181b;
-  --surface-2: #27272a;
-  --ink: #f4f4f5;
-  --ink-2: #a1a1aa;
-  --line: #3f3f46;
-  --focus: #f4f4f5;
-  --thermal: linear-gradient(90deg, #52525b, #f4f4f5);
-  --cold: #a1a1aa;
-  --hot: #f4f4f5;
-  --ia: #c4c4cc;
-  --ia-bg: #202024;
-  --ok: #5fc48b;
-  --warn: #fb923c;
-  --warn-bg: #2a1a10;
-  --c-fis: #fb923c;
-  --c-geo: #86c46b;
-  --c-his: #e58a66;
-  --c-red: #7aa2ff;
-  --c-gl: #e879f9;
+  --paper: #141518;
+  --surface: #1c1d21;
+  --surface-2: #26282d;
+  --ink: #e2e3e6;
+  --ink-2: #9a9da5;
+  --line: #33353b;
+  --c-fis: #e3925f;
+  --c-geo: #8fbd74;
+  --c-his: #d6957a;
+  --c-red: #8aa9e6;
+  --c-gl: #d88cb6;
+  --accent: #a6abb7;
+  --focus: var(--accent);
+  --on-accent: #141518;
+  --accent-soft: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  --thermal: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 45%, var(--surface)));
+  --cold: var(--accent);
+  --hot: var(--accent);
+  --ia: #a9abc6;
+  --ia-bg: #22232b;
+  --ok: #73b98d;
+  --warn: #e0a15e;
+  --warn-bg: #2a2219;
   --display: 'IBM Plex Sans', system-ui, sans-serif;
-  --r-lg: 8px;
-  --r-sm: 4px;
-  --shadow: none;
+  --r-lg: 10px;
+  --r-sm: 6px;
+  --shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.6);
   color-scheme: dark;
 }
+[data-theme='sobrio'][data-disc='fis'] { --accent: var(--c-fis); }
+[data-theme='sobrio'][data-disc='geo'] { --accent: var(--c-geo); }
+[data-theme='sobrio'][data-disc='his'] { --accent: var(--c-his); }
+[data-theme='sobrio'][data-disc='red'] { --accent: var(--c-red); }
+[data-theme='sobrio'][data-disc='gl'] { --accent: var(--c-gl); }
 
 /* ---------- Base ---------- */
 * { box-sizing: border-box; }
@@ -298,8 +311,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .fases { display: flex; gap: 2px; margin-bottom: 0.6rem; border-radius: var(--r-sm); overflow: hidden; }
 .fase { flex: 1; font-size: 0.75rem; padding: 0.3rem 0.5rem; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fase.f1 { background: #2b3fbf; } .fase.f2 { background: #6c3fc9; } .fase.f3 { background: #b23a7a; } .fase.f4 { background: #e8452c; } .fase.f5 { background: #d98a00; }
-[data-theme='sobrio'] .fase { background: var(--ink) !important; color: var(--paper); opacity: 0.9; }
-[data-theme='sobrio'] .fase:nth-child(even) { opacity: 0.7; }
 .semanas { display: grid; gap: 0.6rem; }
 .cal > *, .split > *, .semanas > * { min-width: 0; }
 .semana {
@@ -417,11 +428,9 @@ label.row:has(input[type='checkbox']):hover { background: var(--surface-2); }
 .bim-tab.bim-projeto { border: 2px solid var(--hot); background: color-mix(in srgb, var(--hot) 8%, var(--surface)); min-width: 13rem; }
 .bim-tab.bim-projeto[aria-pressed='true'] { box-shadow: inset 0 -4px 0 var(--hot); }
 .selo-bim { font-size: 0.7rem; font-weight: 700; background: var(--hot); color: #fff; border-radius: 999px; padding: 0.05rem 0.45rem; }
-[data-theme='sobrio'] .selo-bim { background: var(--ink); color: var(--paper); }
 .barra-ferramentas { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.8rem; position: sticky; top: 7.35rem; z-index: 20; background: var(--paper); padding: 0.4rem 0; }
 @media (max-width: 760px) { .barra-ferramentas { top: 3.4rem; } }
 .btn.ia.forte { border-style: solid; background: var(--ia); color: var(--paper); font-weight: 600; }
-[data-theme='sobrio'] .btn.ia.forte { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .fechar-aviso { position: absolute; top: 0.4rem; right: 0.4rem; }
 .toast { position: fixed; left: 50%; bottom: 5.5rem; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 0.65rem 1rem; border-radius: 999px; z-index: 80; box-shadow: var(--shadow); font-size: 0.92rem; max-width: 92vw; }
 .cx.clicavel { cursor: pointer; }
@@ -648,3 +657,19 @@ input[type='checkbox']:focus-visible, input[type='radio']:focus-visible { outlin
   .perfis::after { content: ''; flex: 0 0 0.5rem; }
 }
 @media (max-width: 760px) { .perfis { padding-top: 4px; } .perfil-card[aria-pressed='true'] { outline-offset: -3px; } }
+
+/* ---------- Sóbrio: pontos de contato na cor da disciplina ---------- */
+[data-theme='sobrio'] .btn.primary,
+[data-theme='sobrio'] .btn.ia.forte { background: var(--accent); border-color: var(--accent); color: var(--on-accent); box-shadow: 0 4px 12px -8px var(--accent); }
+[data-theme='sobrio'] .btn.primary:hover:not(:disabled),
+[data-theme='sobrio'] .btn.ia.forte:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); }
+[data-theme='sobrio'] .etapa[aria-current='step'],
+[data-theme='sobrio'] .seg button[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); }
+[data-theme='sobrio'] input[type='checkbox']:checked,
+[data-theme='sobrio'] input[type='radio']:checked { background: var(--accent); border-color: var(--accent); }
+[data-theme='sobrio'] .bim-tab[aria-pressed='true'],
+[data-theme='sobrio'] .bim-tab.bim-projeto[aria-pressed='true'] { border-color: var(--accent); box-shadow: inset 0 -3px 0 var(--accent); background: var(--accent-soft); }
+[data-theme='sobrio'] .selo-bim { background: var(--accent); color: var(--on-accent); }
+[data-theme='sobrio'] .fase { background: color-mix(in srgb, var(--accent) 22%, var(--surface)) !important; color: var(--ink); }
+[data-theme='sobrio'] .fase:nth-child(even) { background: color-mix(in srgb, var(--accent) 12%, var(--surface)) !important; }
+[data-theme='sobrio'] .toast, [data-theme='sobrio'] .fonte-tip { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
