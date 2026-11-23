@@ -427,19 +427,6 @@ export function DocumentoImpressao({ pedido, onVoltar }: { pedido: PedidoDoc; on
             })}
           </div>
         ))}
-        <h3>Rubrica compartilhada da revista</h3>
-        <table>
-          <thead><tr><th>Disciplina</th><th>Critérios</th><th>Pontos</th></tr></thead>
-          <tbody>
-            {discs.map((d) => (
-              <tr key={d}>
-                <td>{disc(d).nome}</td>
-                <td>{s.discs[d].rubrica.map((c) => `${c.texto} (${c.pontos})`).join('; ') || <NP />}</td>
-                <td>{s.discs[d].rubrica.reduce((t, c) => t + c.pontos, 0)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </Folha>
 
       <Folha id="s8" titulo="9. Referências">
@@ -581,8 +568,8 @@ function montarRoteiro(discs: Record<DiscId, DiscDoc>, proj: ProjetoDoc, ws: Sem
     },
     {
       titulo: 'Avaliação',
-      topicos: ['10 pontos por disciplina por bimestre', 'Diagnóstica, portfólio, prova em duas fases, rubrica compartilhada da revista, defesa oral e autoavaliação', 'Avaliação formativa e mediadora (Luckesi, Hoffmann, Perrenoud)'],
-      fala: 'Explicar a rubrica compartilhada: uma mesma revista avaliada por todas as áreas, cada uma com seus critérios.',
+      topicos: ['10 pontos por disciplina por bimestre', 'Diagnóstica, portfólio, prova em duas fases, revista como produto final, defesa oral e autoavaliação', 'Avaliação formativa e mediadora (Luckesi, Hoffmann, Perrenoud)'],
+      fala: 'Explicar que a mesma revista é avaliada por todas as áreas, cada uma olhando para a própria parte.',
     },
     {
       titulo: 'Fechamento',

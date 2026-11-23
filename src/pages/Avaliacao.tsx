@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { DndContext, MouseSensor, TouchSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
-import { DISCIPLINAS, disc } from '../data/base';
+import { disc } from '../data/base';
 import { BIMESTRES } from '../data/calendario';
 import { caixinha } from '../data/caixinhas';
 import { FORMAS_AVALIACAO, formaAvaliacao } from '../data/metodologias';
 import { Escolha } from '../components/Escolha';
 import { AJUDA_AVALIACAO } from '../data/ajudas';
-import { SUG_AVALIACAO, SUG_RUBRICA } from '../data/sugestoes';
+import { SUG_AVALIACAO } from '../data/sugestoes';
 import { useStore } from '../store/store';
 import type { ItemAvaliacao } from '../store/tipos';
 import { Barra, DiscTag, Fontes, SeloOrigem, fmtN } from '../components/ui';
@@ -101,7 +101,6 @@ export function Avaliacao() {
         </div>
       </section>
 
-      <Rubrica />
     </DndContext>
   );
 }
@@ -195,71 +194,3 @@ function ItemCard({ it, onMudar, onRemover, opcoes }: { it: ItemAvaliacao; onMud
   );
 }
 
-function Rubrica() {
-  const s = useStore();
-  const d = s.minhaDisc!;
-  const doc = s.discs[d];
-  const soma = doc.rubrica.reduce((t, c) => t + c.pontos, 0);
-  const itemRubrica = (doc.avaliacao[3] ?? []).find((i) => i.forma === 'rubrica');
-  const valorRevista = itemRubrica ? itemRubrica.pontos : null;
-  const set = (fn: (r: typeof doc.rubrica) => typeof doc.rubrica) => s.atualizarDisc(d, (x) => ({ ...x, rubrica: fn(x.rubrica) }));
-  return (
-    <section className="card">
-      <h2>Como dar nota para a revista (rubrica)</h2>
-      <div className="rubrica-explica small">
-        <p>
-          <strong>Para que serve:</strong> a revista é um trabalho só, mas vale nota em todas as disciplinas. A rubrica é a lista do que você vai olhar na revista para dar a <strong>sua</strong> nota,
-          com quantos pontos vale cada coisa. Assim os alunos sabem antes o que será cobrado, e cada professor corrige a mesma revista olhando para a própria área.
-        </p>
-        <p style={{ margin: 0 }}>
-          <strong>Exemplo em {disc(d).curto}:</strong> se a avaliação "Revista" vale 3 pontos no bimestre, você pode dividir em 3 critérios de 1 ponto cada
-          {SUG_RUBRICA[d][0] ? ` (por exemplo: "${SUG_RUBRICA[d][0]}")` : ''}. A soma dos seus critérios deve ser igual ao valor da avaliação "Revista" acima.
-        </p>
-      </div>
-      <div className="grid2">
-        {DISCIPLINAS.map((x) => {
-          const r = s.discs[x.id].rubrica;
-          const minha = x.id === d;
-          if (!minha && !r.length) return null;
-          return (
-            <div key={x.id} className="momento">
-              <div className="row">
-                <DiscTag d={x.id} />
-                <span className="spacer" />
-                <span className="num small">{fmtN(r.reduce((t, c) => t + c.pontos, 0))} pts</span>
-              </div>
-              {!minha && (r.length ? <ul className="small">{r.map((c) => <li key={c.id}>{c.texto} ({fmtN(c.pontos)})</li>)}</ul> : <p className="small muted">Sem critérios ainda.</p>)}
-              {minha && (
-                <div className="stack">
-                  {r.map((c) => (
-                    <div key={c.id} className="row" style={{ flexWrap: 'nowrap' }}>
-                      <input className="input" value={c.texto} onChange={(e) => set((l) => l.map((y) => (y.id === c.id ? { ...y, texto: e.target.value } : y)))} />
-                      <input className="input num" style={{ width: '5rem' }} type="number" step={0.5} min={0} value={c.pontos} onChange={(e) => set((l) => l.map((y) => (y.id === c.id ? { ...y, pontos: Number(e.target.value) } : y)))} />
-                      <button className="btn sm ghost" aria-label="Remover critério" onClick={() => set((l) => l.filter((y) => y.id !== c.id))}>
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                  <div className="row">
-                    <button className="btn sm" onClick={() => set((l) => [...l, { id: uid(), texto: '', pontos: 1 }])}>
-                      + Critério
-                    </button>
-                    {!r.length && (
-                      <button className="btn sm ia" onClick={() => set(() => SUG_RUBRICA[d].map((t) => ({ id: uid(), texto: t, pontos: 1 })))}>
-                        ✦ Usar critérios sugeridos
-                      </button>
-                    )}
-                  </div>
-                  <span className="small muted">
-                    Soma dos seus critérios: <strong>{fmtN(soma)}</strong> {valorRevista !== null ? `· avaliação "Revista" no 3º bimestre: ${fmtN(valorRevista)}` : '· adicione uma avaliação do tipo "Avaliação por rubrica" no 3º bimestre'}
-                    {valorRevista !== null && valorRevista !== soma && <span style={{ color: 'var(--warn)' }}> (os valores não batem)</span>}
-                  </span>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
