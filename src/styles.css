@@ -624,7 +624,6 @@ input[type='checkbox']:focus-visible, input[type='radio']:focus-visible { outlin
 .login > * { min-width: 0; }
 .perfis { grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr)); }
 @media (max-width: 760px) {
-  .perfis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
   .resolver { display: inline-flex; align-items: center; min-height: 2.5rem; padding: 0 0.4rem; }
   .mini-aula { min-height: 2.25rem; padding: 0.35rem 0.4rem; }
 }
@@ -636,3 +635,16 @@ input[type='checkbox']:focus-visible, input[type='radio']:focus-visible { outlin
   .toast { border-radius: 14px; width: max-content; max-width: min(92vw, 24rem); text-align: center; }
 }
 .toast { z-index: 55; }
+
+/* Login no celular: perfis numa fileira que rola para o lado, sem barra de rolagem. */
+@media (max-width: 760px) {
+  .perfis {
+    display: flex; gap: 0.75rem; overflow-x: auto; overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory; scroll-padding-left: clamp(1.2rem, 5vw, 4rem);
+    scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 1.5rem; max-width: none;
+  }
+  .perfis::-webkit-scrollbar { display: none; }
+  .perfis > * { flex: 0 0 9.5rem; scroll-snap-align: start; }
+  .perfis::after { content: ''; flex: 0 0 0.5rem; }
+}
+@media (max-width: 760px) { .perfis { padding-top: 4px; } .perfil-card[aria-pressed='true'] { outline-offset: -3px; } }
